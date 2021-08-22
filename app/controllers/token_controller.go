@@ -1,17 +1,13 @@
 package controllers
 
 import (
-	"context"
 	"os"
 	"strconv"
 	"time"
 
 	"Komentory/auth/pkg/repository"
 	"Komentory/auth/pkg/utils"
-	"Komentory/auth/platform/cache"
 	"Komentory/auth/platform/database"
-
-	"github.com/go-redis/redis/v8"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -77,34 +73,34 @@ func RenewTokens(c *fiber.Ctx) error {
 		}
 
 		// Create a new Redis connection.
-		connRedis, err := cache.RedisConnection()
-		if err != nil {
-			// Return status 500 and Redis connection error.
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"error": true,
-				"msg":   err.Error(),
-			})
-		}
+		// connRedis, err := cache.RedisConnection()
+		// if err != nil {
+		// 	// Return status 500 and Redis connection error.
+		// 	return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		// 		"error": true,
+		// 		"msg":   err.Error(),
+		// 	})
+		// }
 
 		//
-		_, err = connRedis.Get(context.Background(), userID.String()).Result()
-		if err == redis.Nil {
-			// Return status 401 and unauthorized error message.
-			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"error": true,
-				"msg":   repository.UnauthorizedSessionEnded,
-			})
-		}
+		// _, err = connRedis.Get(context.Background(), userID.String()).Result()
+		// if err == redis.Nil {
+		// 	// Return status 401 and unauthorized error message.
+		// 	return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+		// 		"error": true,
+		// 		"msg":   repository.UnauthorizedSessionEnded,
+		// 	})
+		// }
 
 		// Save refresh token to Redis.
-		errRedis := connRedis.Set(context.Background(), userID.String(), tokens.Refresh, 0).Err()
-		if errRedis != nil {
-			// Return status 500 and Redis connection error.
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"error": true,
-				"msg":   errRedis.Error(),
-			})
-		}
+		// errRedis := connRedis.Set(context.Background(), userID.String(), tokens.Refresh, 0).Err()
+		// if errRedis != nil {
+		// 	// Return status 500 and Redis connection error.
+		// 	return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		// 		"error": true,
+		// 		"msg":   errRedis.Error(),
+		// 	})
+		// }
 
 		// Set expires hours count for refresh key from .env file.
 		hoursCount, _ := strconv.Atoi(os.Getenv("JWT_REFRESH_KEY_EXPIRE_HOURS_COUNT"))

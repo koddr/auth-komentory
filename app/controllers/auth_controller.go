@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"context"
 	"os"
 	"strconv"
 	"time"
@@ -9,7 +8,6 @@ import (
 	"Komentory/auth/app/models"
 	"Komentory/auth/pkg/repository"
 	"Komentory/auth/pkg/utils"
-	"Komentory/auth/platform/cache"
 	"Komentory/auth/platform/database"
 
 	"github.com/gofiber/fiber/v2"
@@ -149,27 +147,27 @@ func UserSignIn(c *fiber.Ctx) error {
 	}
 
 	// Define user ID.
-	userID := foundedUser.ID.String()
+	// userID := foundedUser.ID.String()
 
 	// Create a new Redis connection.
-	connRedis, errRedisConnection := cache.RedisConnection()
-	if errRedisConnection != nil {
-		// Return status 500 and Redis connection error.
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": true,
-			"msg":   errRedisConnection.Error(),
-		})
-	}
+	// connRedis, errRedisConnection := cache.RedisConnection()
+	// if errRedisConnection != nil {
+	// 	// Return status 500 and Redis connection error.
+	// 	return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+	// 		"error": true,
+	// 		"msg":   errRedisConnection.Error(),
+	// 	})
+	// }
 
 	// Set refresh token to Redis.
-	errSetToRedis := connRedis.Set(context.Background(), userID, tokens.Refresh, 0).Err()
-	if errSetToRedis != nil {
-		// Return status 500 and Redis connection error.
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": true,
-			"msg":   errSetToRedis.Error(),
-		})
-	}
+	// errSetToRedis := connRedis.Set(context.Background(), userID, tokens.Refresh, 0).Err()
+	// if errSetToRedis != nil {
+	// 	// Return status 500 and Redis connection error.
+	// 	return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+	// 		"error": true,
+	// 		"msg":   errSetToRedis.Error(),
+	// 	})
+	// }
 
 	// Set expires minutes count for secret key from .env file.
 	minutesCount, err := strconv.Atoi(os.Getenv("JWT_SECRET_KEY_EXPIRE_MINUTES_COUNT"))
@@ -215,37 +213,37 @@ func UserSignIn(c *fiber.Ctx) error {
 // UserSignOut method to de-authorize user and delete refresh token from Redis.
 func UserSignOut(c *fiber.Ctx) error {
 	// Get claims from JWT.
-	claims, errExtractTokenMetaData := utils.ExtractTokenMetaData(c)
-	if errExtractTokenMetaData != nil {
-		// Return status 500 and JWT parse error.
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": true,
-			"msg":   errExtractTokenMetaData.Error(),
-		})
-	}
+	// claims, errExtractTokenMetaData := utils.ExtractTokenMetaData(c)
+	// if errExtractTokenMetaData != nil {
+	// 	// Return status 500 and JWT parse error.
+	// 	return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+	// 		"error": true,
+	// 		"msg":   errExtractTokenMetaData.Error(),
+	// 	})
+	// }
 
 	// Define user ID.
-	userID := claims.UserID.String()
+	// userID := claims.UserID.String()
 
 	// Create a new Redis connection.
-	connRedis, errRedisConnection := cache.RedisConnection()
-	if errRedisConnection != nil {
-		// Return status 500 and Redis connection error.
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": true,
-			"msg":   errRedisConnection.Error(),
-		})
-	}
+	// connRedis, errRedisConnection := cache.RedisConnection()
+	// if errRedisConnection != nil {
+	// 	// Return status 500 and Redis connection error.
+	// 	return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+	// 		"error": true,
+	// 		"msg":   errRedisConnection.Error(),
+	// 	})
+	// }
 
-	// Delete user token from Redis.
-	errDelFromRedis := connRedis.Del(context.Background(), userID).Err()
-	if errDelFromRedis != nil {
-		// Return status 400 and bad request error.
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": true,
-			"msg":   errDelFromRedis.Error(),
-		})
-	}
+	// // Delete user token from Redis.
+	// errDelFromRedis := connRedis.Del(context.Background(), userID).Err()
+	// if errDelFromRedis != nil {
+	// 	// Return status 400 and bad request error.
+	// 	return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+	// 		"error": true,
+	// 		"msg":   errDelFromRedis.Error(),
+	// 	})
+	// }
 
 	// Return status 204 no content.
 	return c.SendStatus(fiber.StatusNoContent)
