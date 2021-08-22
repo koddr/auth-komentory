@@ -1,0 +1,17 @@
+# Files
+.dockerignore
+.editorconfig
+.gitignore
+.env.example
+.env.test
+Dockerfile
+Makefile
+LICENSE
+**/*.md
+**/*_test.go
+
+# Folders
+.git/
+.github/
+build/
+platform/migrations/
