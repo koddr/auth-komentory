@@ -246,7 +246,14 @@ func UserSignOut(c *fiber.Ctx) error {
 	// }
 
 	// Clear refresh token cookie.
-	c.ClearCookie("refresh_token")
+	c.Cookie(&fiber.Cookie{
+		Name:     "refresh_token",
+		Value:    "",
+		Expires:  time.Now(),
+		SameSite: os.Getenv("COOKIE_SAME_SITE"),
+		Secure:   true,
+		HTTPOnly: true,
+	})
 
 	// Return status 204 no content.
 	return c.SendStatus(fiber.StatusNoContent)
