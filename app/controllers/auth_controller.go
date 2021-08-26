@@ -213,14 +213,14 @@ func UserSignIn(c *fiber.Ctx) error {
 // UserSignOut method to de-authorize user and delete refresh token from Redis.
 func UserSignOut(c *fiber.Ctx) error {
 	// Get claims from JWT.
-	// claims, errExtractTokenMetaData := utils.ExtractTokenMetaData(c)
-	// if errExtractTokenMetaData != nil {
-	// 	// Return status 500 and JWT parse error.
-	// 	return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-	// 		"error": true,
-	// 		"msg":   errExtractTokenMetaData.Error(),
-	// 	})
-	// }
+	_, errExtractTokenMetaData := utils.ExtractTokenMetaData(c)
+	if errExtractTokenMetaData != nil {
+		// Return status 500 and JWT parse error.
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": true,
+			"msg":   errExtractTokenMetaData.Error(),
+		})
+	}
 
 	// Define user ID.
 	// userID := claims.UserID.String()
@@ -244,6 +244,9 @@ func UserSignOut(c *fiber.Ctx) error {
 	// 		"msg":   errDelFromRedis.Error(),
 	// 	})
 	// }
+
+	// Clear refresh token cookie.
+	c.ClearCookie("refresh_token")
 
 	// Return status 204 no content.
 	return c.SendStatus(fiber.StatusNoContent)
