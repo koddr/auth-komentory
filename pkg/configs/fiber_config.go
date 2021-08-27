@@ -12,10 +12,20 @@ import (
 // See: https://docs.gofiber.io/api/fiber#config
 func FiberConfig() fiber.Config {
 	// Define server settings.
-	readTimeoutSecondsCount, _ := strconv.Atoi(os.Getenv("SERVER_READ_TIMEOUT"))
+	readTimeoutSecondsCount, err := strconv.Atoi(os.Getenv("SERVER_READ_TIMEOUT"))
+	if err != nil {
+		return fiber.Config{}
+	}
+
+	// Define app settings for production.
+	var startupMessage bool
+	if os.Getenv("STAGE_STATUS") == "prod" {
+		startupMessage = true
+	}
 
 	// Return Fiber configuration.
 	return fiber.Config{
-		ReadTimeout: time.Second * time.Duration(readTimeoutSecondsCount),
+		DisableStartupMessage: startupMessage,
+		ReadTimeout:           time.Second * time.Duration(readTimeoutSecondsCount),
 	}
 }
