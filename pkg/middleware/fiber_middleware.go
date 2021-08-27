@@ -5,6 +5,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/encryptcookie"
 	"github.com/gofiber/fiber/v2/middleware/favicon"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 )
@@ -18,6 +19,10 @@ func FiberMiddleware(a *fiber.App) {
 		cors.New(cors.Config{
 			AllowOrigins:     os.Getenv("ALLOW_ORIGINS"),
 			AllowCredentials: true,
+		}),
+		// Add encrypt cookies.
+		encryptcookie.New(encryptcookie.Config{
+			Key: os.Getenv("COOKIE_ENCRYPT_KEY"),
 		}),
 		// Add func for skip favicon from logs.
 		favicon.New(),
