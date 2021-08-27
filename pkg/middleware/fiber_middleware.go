@@ -5,6 +5,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/favicon"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 )
 
@@ -18,6 +19,8 @@ func FiberMiddleware(a *fiber.App) {
 			AllowOrigins:     os.Getenv("ALLOW_ORIGINS"),
 			AllowCredentials: true,
 		}),
+		// Add func for skip favicon from logs.
+		favicon.New(),
 		// Add simple logger.
 		logger.New(),
 	)
