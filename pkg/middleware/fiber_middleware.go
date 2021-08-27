@@ -22,7 +22,7 @@ func FiberMiddleware(a *fiber.App) {
 		}),
 		// Add encrypt cookies.
 		encryptcookie.New(encryptcookie.Config{
-			Key: os.Getenv("COOKIE_ENCRYPT_KEY"),
+			Key: encryptcookie.GenerateKey(),
 		}),
 		// Add func for skip favicon from logs.
 		favicon.New(),
