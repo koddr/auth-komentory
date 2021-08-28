@@ -1,9 +1,10 @@
 package utils
 
 import (
-	"Komentory/auth/pkg/repository"
 	"fmt"
 	"time"
+
+	"github.com/Komentory/repository"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -20,7 +21,8 @@ func TokenValidateExpireTime(ctx *fiber.Ctx) (*TokenMetaData, error) {
 	// Checking, if now time greather than expiration from JWT.
 	if time.Now().Unix() > claims.Expires {
 		// Return unauthorized (permission denied) error message.
-		return nil, fmt.Errorf(repository.UnauthorizedExpirationTime)
+		m := repository.GenerateErrorMessage(400, "token", "it's time to expire")
+		return nil, fmt.Errorf(m)
 	}
 
 	return claims, nil
@@ -38,14 +40,16 @@ func TokenValidateExpireTimeAndCredentials(ctx *fiber.Ctx, credentials []string)
 	// Checking, if now time greather than expiration from JWT.
 	if time.Now().Unix() > claims.Expires {
 		// Return unauthorized (permission denied) error message.
-		return nil, fmt.Errorf(repository.UnauthorizedExpirationTime)
+		m := repository.GenerateErrorMessage(400, "token", "it's time to expire")
+		return nil, fmt.Errorf(m)
 	}
 
 	//
 	for _, credential := range credentials {
 		// Return unauthorized (permission denied) error message.
 		if !SearchStringInArray(credential, claims.Credentials) {
-			return nil, fmt.Errorf(repository.UnauthorizedCredentials)
+			m := repository.GenerateErrorMessage(400, "credential", "no such credential or incorrect")
+			return nil, fmt.Errorf(m)
 		}
 	}
 

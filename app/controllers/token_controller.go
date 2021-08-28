@@ -5,9 +5,10 @@ import (
 	"strconv"
 	"time"
 
-	"Komentory/auth/pkg/repository"
 	"Komentory/auth/pkg/utils"
 	"Komentory/auth/platform/database"
+
+	"github.com/Komentory/repository"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -22,7 +23,7 @@ func RenewTokens(c *fiber.Ctx) error {
 		// Return status 401 and unauthorized error message.
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"error": true,
-			"msg":   repository.UnauthorizedSessionEnded,
+			"msg":   repository.GenerateErrorMessage(401, "token", "refresh token is missing"),
 		})
 	}
 
@@ -131,7 +132,7 @@ func RenewTokens(c *fiber.Ctx) error {
 		// Return status 401 and unauthorized error message.
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"error": true,
-			"msg":   repository.UnauthorizedSessionEnded,
+			"msg":   repository.GenerateErrorMessage(401, "token", "refresh token is expire"),
 		})
 	}
 }

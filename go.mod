@@ -3,6 +3,7 @@ module Komentory/auth
 go 1.17
 
 require (
+	github.com/Komentory/repository v0.0.2
 	github.com/go-playground/validator/v10 v10.9.0
 	github.com/go-redis/redis/v8 v8.11.3
 	github.com/gofiber/fiber/v2 v2.18.0

@@ -6,9 +6,10 @@ import (
 	"time"
 
 	"Komentory/auth/app/models"
-	"Komentory/auth/pkg/repository"
 	"Komentory/auth/pkg/utils"
 	"Komentory/auth/platform/database"
+
+	"github.com/Komentory/repository"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
@@ -60,7 +61,7 @@ func UserSignUp(c *fiber.Ctx) error {
 	user.PasswordHash = utils.GeneratePassword(signUp.Password)
 	user.Username = user.ID.String()[:4] + user.ID.String()[24:]
 	user.UserStatus = 0 // 0 == unconfirmed, 1 == active, 2 == blocked
-	user.UserRole = repository.UserRoleName
+	user.UserRole = repository.RoleNameUser
 
 	// Validate user fields.
 	if err := validate.Struct(user); err != nil {
@@ -132,7 +133,7 @@ func UserSignIn(c *fiber.Ctx) error {
 		// Return status 403, if password is not compare to stored in database.
 		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
 			"error": true,
-			"msg":   repository.WrongUserEmailOrPassword,
+			"msg":   repository.GenerateErrorMessage(403, "auth", "email or password"),
 		})
 	}
 
@@ -246,14 +247,7 @@ func UserSignOut(c *fiber.Ctx) error {
 	// }
 
 	// Clear refresh token cookie.
-	c.Cookie(&fiber.Cookie{
-		Name:     "refresh_token",
-		Value:    "",
-		Expires:  time.Now(),
-		SameSite: os.Getenv("COOKIE_SAME_SITE"),
-		Secure:   true,
-		HTTPOnly: true,
-	})
+	c.ClearCookie("refresh_token")
 
 	// Return status 204 no content.
 	return c.SendStatus(fiber.StatusNoContent)

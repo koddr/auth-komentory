@@ -5,8 +5,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"Komentory/auth/pkg/repository"
 	"Komentory/auth/pkg/utils"
+
+	"github.com/Komentory/repository"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
@@ -23,7 +24,7 @@ func TestPrivateRoutes(t *testing.T) {
 	// Create token with user role credentials.
 	tokenUserAccess, err := utils.GenerateNewTokens(
 		uuid.NewString(),
-		repository.UserRoleName,
+		repository.RoleNameUser,
 	)
 	if err != nil {
 		panic(err)
