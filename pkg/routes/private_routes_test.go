@@ -8,7 +8,6 @@ import (
 	"Komentory/auth/pkg/utils"
 
 	"github.com/Komentory/repository"
-
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"github.com/joho/godotenv"

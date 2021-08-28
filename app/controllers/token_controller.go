@@ -9,7 +9,6 @@ import (
 	"Komentory/auth/platform/database"
 
 	"github.com/Komentory/repository"
-
 	"github.com/gofiber/fiber/v2"
 )
 

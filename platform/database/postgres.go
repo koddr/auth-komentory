@@ -1,12 +1,12 @@
 package database
 
 import (
-	"Komentory/auth/pkg/utils"
 	"fmt"
 	"os"
 	"strconv"
 	"time"
 
+	"github.com/Komentory/utilities"
 	"github.com/jmoiron/sqlx"
 
 	_ "github.com/jackc/pgx/v4/stdlib" // load pgx driver for PostgreSQL
@@ -29,7 +29,7 @@ func PostgreSQLConnection() (*sqlx.DB, error) {
 	}
 
 	// Build PostgreSQL connection URL.
-	postgresConnURL, err := utils.ConnectionURLBuilder("postgres")
+	postgresConnURL, err := utilities.ConnectionURLBuilder("postgres")
 	if err != nil {
 		return nil, err
 	}

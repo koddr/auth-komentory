@@ -10,6 +10,7 @@ import (
 	"Komentory/auth/platform/database"
 
 	"github.com/Komentory/repository"
+	"github.com/Komentory/utilities"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
@@ -30,14 +31,14 @@ func UserSignUp(c *fiber.Ctx) error {
 	}
 
 	// Create a new validator for a User model.
-	validate := utils.NewValidator()
+	validate := utilities.NewValidator()
 
 	// Validate sign up fields.
 	if err := validate.Struct(signUp); err != nil {
 		// Return, if some fields are not valid.
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": true,
-			"msg":   utils.ValidatorErrors(err),
+			"msg":   utilities.ValidatorErrors(err),
 		})
 	}
 
@@ -58,7 +59,7 @@ func UserSignUp(c *fiber.Ctx) error {
 	user.ID = uuid.New()
 	user.CreatedAt = time.Now()
 	user.Email = signUp.Email
-	user.PasswordHash = utils.GeneratePassword(signUp.Password)
+	user.PasswordHash = utilities.GeneratePassword(signUp.Password)
 	user.Username = user.ID.String()[:4] + user.ID.String()[24:]
 	user.UserStatus = 0 // 0 == unconfirmed, 1 == active, 2 == blocked
 	user.UserRole = repository.RoleNameUser
@@ -68,7 +69,7 @@ func UserSignUp(c *fiber.Ctx) error {
 		// Return, if some fields are not valid.
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": true,
-			"msg":   utils.ValidatorErrors(err),
+			"msg":   utilities.ValidatorErrors(err),
 		})
 	}
 
@@ -128,7 +129,7 @@ func UserSignIn(c *fiber.Ctx) error {
 	}
 
 	// Compare given user password with stored in found user.
-	compareUserPassword := utils.ComparePasswords(foundedUser.PasswordHash, signIn.Password)
+	compareUserPassword := utilities.ComparePasswords(foundedUser.PasswordHash, signIn.Password)
 	if !compareUserPassword {
 		// Return status 403, if password is not compare to stored in database.
 		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
@@ -214,7 +215,7 @@ func UserSignIn(c *fiber.Ctx) error {
 // UserSignOut method to de-authorize user and delete refresh token from Redis.
 func UserSignOut(c *fiber.Ctx) error {
 	// Get claims from JWT.
-	_, errExtractTokenMetaData := utils.ExtractTokenMetaData(c)
+	_, errExtractTokenMetaData := utilities.ExtractTokenMetaData(c)
 	if errExtractTokenMetaData != nil {
 		// Return status 500 and JWT parse error.
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{

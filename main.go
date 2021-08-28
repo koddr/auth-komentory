@@ -4,9 +4,9 @@ import (
 	"Komentory/auth/pkg/configs"
 	"Komentory/auth/pkg/middleware"
 	"Komentory/auth/pkg/routes"
-	"Komentory/auth/pkg/utils"
 	"os"
 
+	"github.com/Komentory/utilities"
 	"github.com/gofiber/fiber/v2"
 
 	_ "github.com/joho/godotenv/autoload" // load .env file automatically
@@ -29,8 +29,8 @@ func main() {
 
 	// Start server (with or without graceful shutdown).
 	if os.Getenv("STAGE_STATUS") == "dev" {
-		utils.StartServer(app)
+		utilities.StartServer(app)
 	} else {
-		utils.StartServerWithGracefulShutdown(app)
+		utilities.StartServerWithGracefulShutdown(app)
 	}
 }
