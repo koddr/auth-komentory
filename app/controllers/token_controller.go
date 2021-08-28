@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"time"
 
-	"Komentory/auth/pkg/utils"
+	"Komentory/auth/pkg/helpers"
 	"Komentory/auth/platform/database"
 
 	"github.com/Komentory/repository"
@@ -30,7 +30,7 @@ func RenewTokens(c *fiber.Ctx) error {
 	now := time.Now().Unix()
 
 	// Set expiration time from Refresh token of current user.
-	userID, expires, err := utils.ParseRefreshToken(oldRefreshToken)
+	userID, expires, err := helpers.ParseRefreshToken(oldRefreshToken)
 	if err != nil {
 		// Return status 400 and error message.
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -63,7 +63,7 @@ func RenewTokens(c *fiber.Ctx) error {
 		}
 
 		// Generate JWT Access & Refresh tokens.
-		tokens, err := utils.GenerateNewTokens(userID.String(), foundedUser.UserRole)
+		tokens, err := helpers.GenerateNewTokens(userID.String(), foundedUser.UserRole)
 		if err != nil {
 			// Return status 500 and token generation error.
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{

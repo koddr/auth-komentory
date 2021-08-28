@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"Komentory/auth/app/models"
-	"Komentory/auth/pkg/utils"
+	"Komentory/auth/pkg/helpers"
 	"Komentory/auth/platform/database"
 
 	"github.com/Komentory/repository"
@@ -139,7 +139,7 @@ func UserSignIn(c *fiber.Ctx) error {
 	}
 
 	// Generate a new pair of access and refresh tokens.
-	tokens, errGenerateNewTokens := utils.GenerateNewTokens(foundedUser.ID.String(), foundedUser.UserRole)
+	tokens, errGenerateNewTokens := helpers.GenerateNewTokens(foundedUser.ID.String(), foundedUser.UserRole)
 	if errGenerateNewTokens != nil {
 		// Return status 500 and token generation error.
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{

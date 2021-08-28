@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"Komentory/auth/pkg/utils"
+	"Komentory/auth/pkg/helpers"
 
 	"github.com/Komentory/repository"
 	"github.com/gofiber/fiber/v2"
@@ -21,7 +21,7 @@ func TestPrivateRoutes(t *testing.T) {
 	}
 
 	// Create token with user role credentials.
-	tokenUserAccess, err := utils.GenerateNewTokens(
+	tokenUserAccess, err := helpers.GenerateNewTokens(
 		uuid.NewString(),
 		repository.RoleNameUser,
 	)
