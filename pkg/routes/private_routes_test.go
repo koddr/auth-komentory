@@ -7,7 +7,7 @@ import (
 
 	"Komentory/auth/pkg/helpers"
 
-	"github.com/Komentory/repository"
+	"github.com/Komentory/utilities"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"github.com/joho/godotenv"
@@ -23,7 +23,7 @@ func TestPrivateRoutes(t *testing.T) {
 	// Create token with user role credentials.
 	tokenUserAccess, err := helpers.GenerateNewTokens(
 		uuid.NewString(),
-		repository.RoleNameUser,
+		utilities.RoleNameUser,
 	)
 	if err != nil {
 		panic(err)

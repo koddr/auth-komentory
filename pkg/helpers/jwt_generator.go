@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Komentory/repository"
+	"github.com/Komentory/utilities"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 )
@@ -67,7 +67,7 @@ func generateNewAccessToken(id, role string) (string, error) {
 	// Set expires minutes count for secret key from .env file.
 	minutesCount, err := strconv.Atoi(os.Getenv("JWT_SECRET_KEY_EXPIRE_MINUTES_COUNT"))
 	if err != nil {
-		m := repository.GenerateErrorMessage(400, "token", "invalid expiration minutes count")
+		m := utilities.GenerateErrorMessage(400, "token", "invalid expiration minutes count")
 		return "", fmt.Errorf(m)
 	}
 
@@ -76,11 +76,11 @@ func generateNewAccessToken(id, role string) (string, error) {
 
 	// Set default role.
 	if role == "" {
-		role = repository.RoleNameUser
+		role = utilities.RoleNameUser
 	}
 
 	// Get credentials from role.
-	credentials, err := repository.GenerateCredentialsByRoleName(role)
+	credentials, err := utilities.GenerateCredentialsByRoleName(role)
 	if err != nil {
 		return "", err
 	}
@@ -120,7 +120,7 @@ func generateNewRefreshToken(userID string) (string, error) {
 	// Set expires hours count for refresh key from .env file.
 	hoursCount, err := strconv.Atoi(os.Getenv("JWT_REFRESH_KEY_EXPIRE_HOURS_COUNT"))
 	if err != nil {
-		m := repository.GenerateErrorMessage(400, "refresh token", "invalid expiration hours count")
+		m := utilities.GenerateErrorMessage(400, "refresh token", "invalid expiration hours count")
 		return "", fmt.Errorf(m)
 	}
 

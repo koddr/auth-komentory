@@ -9,9 +9,7 @@ import (
 	"Komentory/auth/pkg/helpers"
 	"Komentory/auth/platform/database"
 
-	"github.com/Komentory/repository"
 	"github.com/Komentory/utilities"
-
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 )
@@ -62,7 +60,7 @@ func UserSignUp(c *fiber.Ctx) error {
 	user.PasswordHash = utilities.GeneratePassword(signUp.Password)
 	user.Username = user.ID.String()[:4] + user.ID.String()[24:]
 	user.UserStatus = 0 // 0 == unconfirmed, 1 == active, 2 == blocked
-	user.UserRole = repository.RoleNameUser
+	user.UserRole = utilities.RoleNameUser
 
 	// Validate user fields.
 	if err := validate.Struct(user); err != nil {
@@ -134,7 +132,7 @@ func UserSignIn(c *fiber.Ctx) error {
 		// Return status 403, if password is not compare to stored in database.
 		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
 			"error": true,
-			"msg":   repository.GenerateErrorMessage(403, "auth", "email or password"),
+			"msg":   utilities.GenerateErrorMessage(403, "auth", "email or password"),
 		})
 	}
 
