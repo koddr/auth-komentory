@@ -58,7 +58,6 @@ func RenewTokens(c *fiber.Ctx) error {
 			return c.Status(status).JSON(fiber.Map{
 				"error": true,
 				"msg":   errGetUserByID.Error(),
-				"user":  nil,
 			})
 		}
 
@@ -121,7 +120,6 @@ func RenewTokens(c *fiber.Ctx) error {
 		// Return status 200 OK and new access token with expiration time.
 		return c.JSON(fiber.Map{
 			"error": false,
-			"msg":   nil,
 			"jwt": fiber.Map{
 				"expire": time.Now().Add(time.Minute * time.Duration(minutesCount)).Unix(),
 				"token":  tokens.Access,

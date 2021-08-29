@@ -61,6 +61,12 @@ func UserSignUp(c *fiber.Ctx) error {
 	user.Username = user.ID.String()[:4] + user.ID.String()[24:]
 	user.UserStatus = 0 // 0 == unconfirmed, 1 == active, 2 == blocked
 	user.UserRole = utilities.RoleNameUser
+	user.UserAttrs.FirstName = signUp.UserAttrs.FirstName
+
+	// Set optional user data:
+	if signUp.UserAttrs.LastName != "" {
+		user.UserAttrs.LastName = signUp.UserAttrs.LastName
+	}
 
 	// Validate user fields.
 	if err := validate.Struct(user); err != nil {
@@ -80,15 +86,8 @@ func UserSignUp(c *fiber.Ctx) error {
 		})
 	}
 
-	// Delete password hash field from JSON view.
-	user.PasswordHash = ""
-
 	// Return status 201 created.
-	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
-		"error": false,
-		"msg":   nil,
-		"user":  user,
-	})
+	return c.SendStatus(fiber.StatusCreated)
 }
 
 // UserSignIn method to auth user and return access and refresh tokens.
@@ -122,7 +121,6 @@ func UserSignIn(c *fiber.Ctx) error {
 		return c.Status(status).JSON(fiber.Map{
 			"error": true,
 			"msg":   errGetUserByEmail.Error(),
-			"user":  nil,
 		})
 	}
 
@@ -202,7 +200,6 @@ func UserSignIn(c *fiber.Ctx) error {
 	// Return status 200 OK.
 	return c.JSON(fiber.Map{
 		"error": false,
-		"msg":   nil,
 		"jwt": fiber.Map{
 			"expire": time.Now().Add(time.Minute * time.Duration(minutesCount)).Unix(),
 			"token":  tokens.Access,
