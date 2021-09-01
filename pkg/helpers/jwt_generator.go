@@ -2,8 +2,6 @@ package helpers
 
 import (
 	"Komentory/auth/app/models"
-	"crypto/sha256"
-	"encoding/hex"
 	"fmt"
 	"os"
 	"strconv"
@@ -44,14 +42,14 @@ func ParseRefreshToken(refreshToken string) (uuid.UUID, int64, error) {
 		return uuid.UUID{}, 0, fmt.Errorf("refresh token is empty or not valid")
 	}
 
-	//
-	userID, err := uuid.Parse(strings.Split(refreshToken, ".")[1])
+	// Parse user ID (UUID).
+	userID, err := uuid.Parse(strings.Split(refreshToken, ".")[0])
 	if err != nil {
 		return uuid.UUID{}, 0, fmt.Errorf("user ID is empty or not valid")
 	}
 
-	//
-	token, err := strconv.ParseInt(strings.Split(refreshToken, ".")[2], 0, 64)
+	// Parse timestamp (int64).
+	token, err := strconv.ParseInt(strings.Split(refreshToken, ".")[1], 0, 64)
 	if err != nil {
 		return uuid.UUID{}, 0, fmt.Errorf("expire time is empty or not valid")
 	}
@@ -104,19 +102,6 @@ func generateNewAccessToken(id, role string) (string, error) {
 }
 
 func generateNewRefreshToken(userID string) (string, error) {
-	// Create a new SHA256 hash.
-	sha256 := sha256.New()
-
-	// Create a new now date and time string with salt.
-	refresh := os.Getenv("JWT_REFRESH_KEY") + time.Now().String()
-
-	// See: https://pkg.go.dev/io#Writer.Write
-	_, err := sha256.Write([]byte(refresh))
-	if err != nil {
-		// Return error, it refresh token generation failed.
-		return "", err
-	}
-
 	// Set expires hours count for refresh key from .env file.
 	hoursCount, err := strconv.Atoi(os.Getenv("JWT_REFRESH_KEY_EXPIRE_HOURS_COUNT"))
 	if err != nil {
@@ -125,10 +110,8 @@ func generateNewRefreshToken(userID string) (string, error) {
 	}
 
 	// Set expiration time.
-	expireTime := fmt.Sprint(time.Now().Add(time.Hour * time.Duration(hoursCount)).Unix())
+	expireTime := time.Now().Add(time.Hour * time.Duration(hoursCount)).Unix()
 
-	// Create a new refresh token (sha256 string with salt + user ID + expire time).
-	t := hex.EncodeToString(sha256.Sum(nil)) + "." + userID + "." + expireTime
-
-	return t, nil
+	// Return a new refresh token (nanoID random string + user ID + expire time).
+	return fmt.Sprintf("%s.%d", userID, expireTime), nil
 }

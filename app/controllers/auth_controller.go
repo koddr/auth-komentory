@@ -53,12 +53,22 @@ func UserSignUp(c *fiber.Ctx) error {
 	// Create a new user struct.
 	user := &models.User{}
 
+	// Generate a new username with nanoID.
+	randomUsername, errGenerateNewNanoID := utilities.GenerateNewNanoID("", 18)
+	if errGenerateNewNanoID != nil {
+		// Return status 500 and username generation error.
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": true,
+			"msg":   errGenerateNewNanoID.Error(),
+		})
+	}
+
 	// Set initialized default data for user:
 	user.ID = uuid.New()
 	user.CreatedAt = time.Now()
 	user.Email = signUp.Email
 	user.PasswordHash = utilities.GeneratePassword(signUp.Password)
-	user.Username = user.ID.String()[:4] + user.ID.String()[24:]
+	user.Username = randomUsername
 	user.UserStatus = 0 // 0 == unconfirmed, 1 == active, 2 == blocked
 	user.UserRole = utilities.RoleNameUser
 	user.UserAttrs.FirstName = signUp.UserAttrs.FirstName
