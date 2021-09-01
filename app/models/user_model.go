@@ -16,7 +16,7 @@ type User struct {
 	UpdatedAt    time.Time `db:"updated_at" json:"updated_at"`
 	Email        string    `db:"email" json:"email" validate:"required,email,lte=255"`
 	PasswordHash string    `db:"password_hash" json:"password_hash,omitempty" validate:"required,lte=64"`
-	Username     string    `db:"username" json:"username" validate:"required,lte=16"`
+	Username     string    `db:"username" json:"username" validate:"required,lte=18"`
 	UserStatus   int       `db:"user_status" json:"user_status" validate:"int"`
 	UserRole     string    `db:"user_role" json:"user_role" validate:"required,lte=32"`
 	UserAttrs    UserAttrs `db:"user_attrs" json:"user_attrs" validate:"required,dive"`
