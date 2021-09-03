@@ -9,7 +9,7 @@ type SignUp struct {
 
 // SignUpUserAttrs struct to describe user attributes.
 type SignUpUserAttrs struct {
-	FirstName string `json:"first_name"`
+	FirstName string `json:"first_name" validate:"required"`
 	LastName  string `json:"last_name"`
 }
 
