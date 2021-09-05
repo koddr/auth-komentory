@@ -81,7 +81,7 @@ func UserSignUp(c *fiber.Ctx) error {
 
 	// Set optional user settings:
 	if signUp.UserSettings.MarketingEmailSubscription {
-		signUp.UserSettings.MarketingEmailSubscription = true
+		user.UserSettings.MarketingEmailSubscription = true
 	}
 
 	// Validate user fields.

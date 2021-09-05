@@ -82,7 +82,8 @@ func (q *UserQueries) CreateUser(u *models.User) error {
 	VALUES (
 		$1::uuid, $2::timestamp, $3::timestamp, 
 		$4::varchar, $5::varchar, $6::varchar, 
-		$7::int, $8::varchar, $9::jsonb
+		$7::int, $8::varchar, $9::jsonb, 
+		$10::jsonb
 	)
 	`
 
@@ -92,6 +93,7 @@ func (q *UserQueries) CreateUser(u *models.User) error {
 		u.ID, u.CreatedAt, u.UpdatedAt,
 		u.Email, u.PasswordHash, u.Username,
 		u.UserStatus, u.UserRole, u.UserAttrs,
+		u.UserSettings,
 	)
 	if err != nil {
 		// Return only error.
