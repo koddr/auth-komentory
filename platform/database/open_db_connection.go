@@ -1,6 +1,10 @@
 package database
 
-import "Komentory/auth/app/queries"
+import (
+	"Komentory/auth/app/queries"
+
+	"github.com/Komentory/utilities/database"
+)
 
 // Queries struct for collect all app queries.
 type Queries struct {
@@ -10,7 +14,7 @@ type Queries struct {
 // OpenDBConnection func for opening database connection.
 func OpenDBConnection() (*Queries, error) {
 	// Define a new PostgreSQL connection.
-	db, err := PostgreSQLConnection()
+	db, err := database.PostgreSQLConnection()
 	if err != nil {
 		return nil, err
 	}
