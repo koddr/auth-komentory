@@ -72,10 +72,16 @@ func UserSignUp(c *fiber.Ctx) error {
 	user.UserStatus = 0 // 0 == unconfirmed, 1 == active, 2 == blocked
 	user.UserRole = utilities.RoleNameUser
 	user.UserAttrs.FirstName = signUp.UserAttrs.FirstName
+	user.UserSettings.TransactionalEmailSubscription = true
 
 	// Set optional user data:
 	if signUp.UserAttrs.LastName != "" {
 		user.UserAttrs.LastName = signUp.UserAttrs.LastName
+	}
+
+	// Set optional user settings:
+	if signUp.UserSettings.MarketingEmailSubscription {
+		signUp.UserSettings.MarketingEmailSubscription = true
 	}
 
 	// Validate user fields.
