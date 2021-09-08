@@ -82,7 +82,7 @@ func (q *UserQueries) CreateUser(u *models.User) error {
 	VALUES (
 		$1::uuid, $2::timestamp, $3::timestamp, 
 		$4::varchar, $5::varchar, $6::varchar, 
-		$7::int, $8::varchar, $9::jsonb, 
+		$7::int, $8::int, $9::jsonb, 
 		$10::jsonb
 	)
 	`
@@ -95,6 +95,26 @@ func (q *UserQueries) CreateUser(u *models.User) error {
 		u.UserStatus, u.UserRole, u.UserAttrs,
 		u.UserSettings,
 	)
+	if err != nil {
+		// Return only error.
+		return err
+	}
+
+	// This query returns nothing.
+	return nil
+}
+
+// UpdateUserStatus query for updating user status by given user ID.
+func (q *UserQueries) UpdateUserStatus(id uuid.UUID) error {
+	// Define query string.
+	query := `
+	UPDATE users 
+	SET user_status = 1 
+	WHERE id = $1::uuid
+	`
+
+	// Send query to database.
+	_, err := q.Exec(query, id)
 	if err != nil {
 		// Return only error.
 		return err

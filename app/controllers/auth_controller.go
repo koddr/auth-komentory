@@ -50,6 +50,16 @@ func UserSignUp(c *fiber.Ctx) error {
 		})
 	}
 
+	// Check for user is already sign up by given email.
+	_, _, errGetUserByEmail := db.GetUserByEmail(signUp.Email)
+	if errGetUserByEmail == nil {
+		// If user is found (err == nil), return status 400.
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": true,
+			"msg":   utilities.GenerateErrorMessage(400, "user", "email"),
+		})
+	}
+
 	// Create a new user struct.
 	user := &models.User{}
 
@@ -63,7 +73,7 @@ func UserSignUp(c *fiber.Ctx) error {
 		})
 	}
 
-	// Set initialized default data for user:
+	// Set user data:
 	user.ID = uuid.New()
 	user.CreatedAt = time.Now()
 	user.Email = signUp.Email
@@ -102,8 +112,47 @@ func UserSignUp(c *fiber.Ctx) error {
 		})
 	}
 
+	// Generate a new activation code with nanoID.
+	randomActivationCode, errGenerateNewNanoID := utilities.GenerateNewNanoID(os.Getenv("RESET_CODES_CHARS_STRING"), 14)
+	if errGenerateNewNanoID != nil {
+		// Return status 500 and activation code generation error.
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": true,
+			"msg":   errGenerateNewNanoID.Error(),
+		})
+	}
+
+	// Create a new ResetCode struct for activation code.
+	activationCode := &models.ResetCode{}
+
+	// Set data for activation code:
+	activationCode.Code = randomActivationCode
+	activationCode.ExpireAt = user.CreatedAt.Add(time.Hour * 24) // set 24 hour expiration time
+	activationCode.UserID = user.ID
+
+	// Validate activation code fields.
+	if err := validate.Struct(activationCode); err != nil {
+		// Return, if some fields are not valid.
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": true,
+			"msg":   utilities.ValidatorErrors(err),
+		})
+	}
+
+	// Create a new activation code with validated data.
+	if err := db.CreateResetCode(activationCode); err != nil {
+		// Return status 500 and create user process error.
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": true,
+			"msg":   err.Error(),
+		})
+	}
+
 	// Return status 201 created.
-	return c.SendStatus(fiber.StatusCreated)
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
+		"error":           false,
+		"activation_code": randomActivationCode,
+	})
 }
 
 // UserSignIn method to auth user and return access and refresh tokens.

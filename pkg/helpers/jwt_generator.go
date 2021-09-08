@@ -14,7 +14,7 @@ import (
 )
 
 // GenerateNewTokens func for generate a new Access & Refresh tokens.
-func GenerateNewTokens(id, role string) (*models.Tokens, error) {
+func GenerateNewTokens(id string, role int) (*models.Tokens, error) {
 	// Generate JWT Access token.
 	accessToken, err := generateNewAccessToken(id, role)
 	if err != nil {
@@ -58,7 +58,7 @@ func ParseRefreshToken(refreshToken string) (uuid.UUID, int64, error) {
 	return userID, token, nil
 }
 
-func generateNewAccessToken(id, role string) (string, error) {
+func generateNewAccessToken(id string, role int) (string, error) {
 	// Set secret key from .env file.
 	secret := os.Getenv("JWT_SECRET_KEY")
 
@@ -73,12 +73,12 @@ func generateNewAccessToken(id, role string) (string, error) {
 	claims := jwt.MapClaims{}
 
 	// Set default role.
-	if role == "" {
+	if role == 0 {
 		role = utilities.RoleNameUser
 	}
 
 	// Get credentials from role.
-	credentials, err := utilities.GenerateCredentialsByRoleName(role)
+	credentials, err := utilities.GenerateCredentialsByRole(role)
 	if err != nil {
 		return "", err
 	}

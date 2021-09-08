@@ -17,4 +17,7 @@ func PublicRoutes(a *fiber.App) {
 
 	// Routes for PUT method:
 	route.Put("/sign/up", controllers.UserSignUp) // register a new user
+
+	// Routes for PATCH method:
+	route.Patch("/account/activate", controllers.ActivateAccount) // activate account by code
 }
