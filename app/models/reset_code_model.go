@@ -15,5 +15,5 @@ type ResetCode struct {
 
 // ActivationCode struct to describe activation code object.
 type ActivationCode struct {
-	Code string `json:"code"`
+	Code string `json:"code" validate:"required"`
 }
