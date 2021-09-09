@@ -39,9 +39,10 @@ func UserSignUp(c *fiber.Ctx) error {
 		return utilities.CheckForError(c, err, 500, "database", "no connection")
 	}
 
-	// Check for user is already sign up by given email (err == nil).
+	// Check for user is already sign up by given email.
+	// If status is 404, user is not signed up.
 	foundedUser, status, err := db.GetUserByEmail(signUp.Email)
-	if err != nil {
+	if err != nil && status != 404 {
 		return utilities.CheckForError(c, err, status, "user", err.Error())
 	}
 
