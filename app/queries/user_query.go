@@ -3,9 +3,7 @@ package queries
 import (
 	"Komentory/auth/app/models"
 	"database/sql"
-	"fmt"
 
-	"github.com/Komentory/utilities"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -38,7 +36,7 @@ func (q *UserQueries) GetUserByID(id uuid.UUID) (models.User, int, error) {
 		return user, fiber.StatusOK, nil
 	case sql.ErrNoRows:
 		// Return empty object and 404 error.
-		return user, fiber.StatusNotFound, fmt.Errorf(utilities.GenerateErrorMessage(404, "user", "id"))
+		return user, fiber.StatusNotFound, err
 	default:
 		// Return empty object and 400 error.
 		return user, fiber.StatusBadRequest, err
@@ -67,7 +65,7 @@ func (q *UserQueries) GetUserByEmail(email string) (models.User, int, error) {
 		return user, fiber.StatusOK, nil
 	case sql.ErrNoRows:
 		// Return empty object and 404 error.
-		return user, fiber.StatusNotFound, fmt.Errorf(utilities.GenerateErrorMessage(404, "user", "email"))
+		return user, fiber.StatusNotFound, err
 	default:
 		// Return empty object and 400 error.
 		return user, fiber.StatusBadRequest, err

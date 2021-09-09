@@ -20,10 +20,7 @@ func RenewTokens(c *fiber.Ctx) error {
 	// If no refresh token in request.
 	if oldRefreshToken == "" {
 		// Return status 401 and unauthorized error message.
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"error": true,
-			"msg":   utilities.GenerateErrorMessage(401, "token", "refresh token is missing"),
-		})
+		return utilities.ThrowJSONError(c, 401, "token", "refresh token is missing")
 	}
 
 	// Get now time.
@@ -32,11 +29,7 @@ func RenewTokens(c *fiber.Ctx) error {
 	// Set expiration time from Refresh token of current user.
 	userID, expires, err := helpers.ParseRefreshToken(oldRefreshToken)
 	if err != nil {
-		// Return status 400 and error message.
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": true,
-			"msg":   err.Error(),
-		})
+		return utilities.CheckForError(c, err, 400, "refresh token", "wrong incoming data")
 	}
 
 	// Checking, if now time greather than Refresh token expiration time.
@@ -44,31 +37,19 @@ func RenewTokens(c *fiber.Ctx) error {
 		// Create database connection.
 		db, err := database.OpenDBConnection()
 		if err != nil {
-			// Return status 500 and database connection error.
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"error": true,
-				"msg":   err.Error(),
-			})
+			return utilities.CheckForError(c, err, 500, "database", "no connection")
 		}
 
 		// Get user by ID.
-		foundedUser, status, errGetUserByID := db.GetUserByID(userID)
-		if errGetUserByID != nil {
-			// Return status and error message.
-			return c.Status(status).JSON(fiber.Map{
-				"error": true,
-				"msg":   errGetUserByID.Error(),
-			})
+		foundedUser, status, err := db.GetUserByID(userID)
+		if err != nil {
+			return utilities.CheckForError(c, err, status, "user", err.Error())
 		}
 
 		// Generate JWT Access & Refresh tokens.
 		tokens, err := helpers.GenerateNewTokens(userID.String(), foundedUser.UserRole)
 		if err != nil {
-			// Return status 500 and token generation error.
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"error": true,
-				"msg":   err.Error(),
-			})
+			return utilities.CheckForError(c, err, 500, "jwt", err.Error())
 		}
 
 		// Create a new Redis connection.
@@ -101,8 +82,17 @@ func RenewTokens(c *fiber.Ctx) error {
 		// 	})
 		// }
 
+		// Set expires minutes count for secret key from .env file.
+		minutesCount, err := strconv.Atoi(os.Getenv("JWT_SECRET_KEY_EXPIRE_MINUTES_COUNT"))
+		if err != nil {
+			return utilities.CheckForError(c, err, 500, "minutes count", err.Error())
+		}
+
 		// Set expires hours count for refresh key from .env file.
-		hoursCount, _ := strconv.Atoi(os.Getenv("JWT_REFRESH_KEY_EXPIRE_HOURS_COUNT"))
+		hoursCount, err := strconv.Atoi(os.Getenv("JWT_REFRESH_KEY_EXPIRE_HOURS_COUNT"))
+		if err != nil {
+			return utilities.CheckForError(c, err, 500, "hours count", err.Error())
+		}
 
 		// Set HttpOnly cookie with refresh token.
 		c.Cookie(&fiber.Cookie{
@@ -114,9 +104,6 @@ func RenewTokens(c *fiber.Ctx) error {
 			HTTPOnly: true,
 		})
 
-		// Set expires minutes count for secret key from .env file.
-		minutesCount, _ := strconv.Atoi(os.Getenv("JWT_SECRET_KEY_EXPIRE_MINUTES_COUNT"))
-
 		// Return status 200 OK and new access token with expiration time.
 		return c.JSON(fiber.Map{
 			"error": false,
@@ -127,9 +114,6 @@ func RenewTokens(c *fiber.Ctx) error {
 		})
 	} else {
 		// Return status 401 and unauthorized error message.
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"error": true,
-			"msg":   utilities.GenerateErrorMessage(401, "token", "refresh token is expire"),
-		})
+		return utilities.ThrowJSONError(c, 401, "token", "refresh token is expire")
 	}
 }

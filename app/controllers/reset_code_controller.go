@@ -20,31 +20,19 @@ func ActivateAccount(c *fiber.Ctx) error {
 
 	// Checking received data from JSON body.
 	if err := c.BodyParser(activationCode); err != nil {
-		// Return status 400 and error message.
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": true,
-			"msg":   err.Error(),
-		})
+		return utilities.CheckForError(c, err, 400, "activation code", "wrong incoming data")
 	}
 
 	// Create database connection.
 	db, err := database.OpenDBConnection()
 	if err != nil {
-		// Return status 500 and database connection error.
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": true,
-			"msg":   err.Error(),
-		})
+		return utilities.CheckForError(c, err, 500, "database", "no connection")
 	}
 
 	// Get code by given string.
-	foundedCode, status, errGetResetCode := db.GetResetCode(activationCode.Code)
-	if errGetResetCode != nil {
-		// Return status and error message.
-		return c.Status(status).JSON(fiber.Map{
-			"error": true,
-			"msg":   errGetResetCode.Error(),
-		})
+	foundedCode, status, err := db.GetResetCode(activationCode.Code)
+	if err != nil {
+		return utilities.CheckForError(c, err, status, "activation code", err.Error())
 	}
 
 	// Checking, if now time greather than activation code expiration time.
@@ -52,38 +40,23 @@ func ActivateAccount(c *fiber.Ctx) error {
 		// Get user by given ID.
 		foundedUser, status, errGetUserByID := db.GetUserByID(foundedCode.UserID)
 		if errGetUserByID != nil {
-			// Return status and error message.
-			return c.Status(status).JSON(fiber.Map{
-				"error": true,
-				"msg":   errGetUserByID.Error(),
-			})
+			return utilities.CheckForError(c, err, status, "user", err.Error())
 		}
 
 		// Update user status to 1 (active).
-		if errUpdateUserStatus := db.UpdateUserStatus(foundedUser.ID); errUpdateUserStatus != nil {
-			// Return status 400 and bad request error message.
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": true,
-				"msg":   errUpdateUserStatus.Error(),
-			})
+		if err := db.UpdateUserStatus(foundedUser.ID); err != nil {
+			return utilities.CheckForError(c, err, 400, "user", "wrong incoming user ID")
 		}
 
 		// Delete activation code.
-		if errDeleteResetCode := db.DeleteResetCode(activationCode.Code); errDeleteResetCode != nil {
-			// Return status 400 and bad request error message.
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": true,
-				"msg":   errDeleteResetCode.Error(),
-			})
+		if err := db.DeleteResetCode(activationCode.Code); err != nil {
+			return utilities.CheckForError(c, err, 400, "activation code", "wrong incoming activation code")
 		}
 
 		// Return status 204 no content.
 		return c.SendStatus(fiber.StatusNoContent)
 	} else {
 		// Return status 400 and bad request error message.
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": true,
-			"msg":   utilities.GenerateErrorMessage(400, "code", "activation code is expire"),
-		})
+		return utilities.ThrowJSONError(c, 400, "code", "activation code is expire")
 	}
 }

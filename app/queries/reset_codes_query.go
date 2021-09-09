@@ -3,9 +3,7 @@ package queries
 import (
 	"Komentory/auth/app/models"
 	"database/sql"
-	"fmt"
 
-	"github.com/Komentory/utilities"
 	"github.com/gofiber/fiber/v2"
 	"github.com/jmoiron/sqlx"
 )
@@ -37,7 +35,7 @@ func (q *ResetCodeQueries) GetResetCode(code string) (models.ResetCode, int, err
 		return resetCode, fiber.StatusOK, nil
 	case sql.ErrNoRows:
 		// Return empty object and 404 error.
-		return resetCode, fiber.StatusNotFound, fmt.Errorf(utilities.GenerateErrorMessage(404, "reset code", "code"))
+		return resetCode, fiber.StatusNotFound, err
 	default:
 		// Return empty object and 400 error.
 		return resetCode, fiber.StatusBadRequest, err

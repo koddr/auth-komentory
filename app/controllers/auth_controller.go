@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 	"time"
@@ -21,11 +22,7 @@ func UserSignUp(c *fiber.Ctx) error {
 
 	// Checking received data from JSON body.
 	if err := c.BodyParser(signUp); err != nil {
-		// Return status 400 and error message.
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": true,
-			"msg":   err.Error(),
-		})
+		return utilities.CheckForError(c, err, 400, "sign up", "wrong incoming data")
 	}
 
 	// Create a new validator for a User model.
@@ -33,44 +30,33 @@ func UserSignUp(c *fiber.Ctx) error {
 
 	// Validate sign up fields.
 	if err := validate.Struct(signUp); err != nil {
-		// Return, if some fields are not valid.
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": true,
-			"msg":   utilities.ValidatorErrors(err),
-		})
+		return utilities.CheckForError(c, err, 400, "sign up", fmt.Sprintf("data is not valid, %v", err))
 	}
 
 	// Create database connection.
-	db, errOpenDBConnection := database.OpenDBConnection()
-	if errOpenDBConnection != nil {
-		// Return status 500 and database connection error.
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": true,
-			"msg":   errOpenDBConnection.Error(),
-		})
+	db, err := database.OpenDBConnection()
+	if err != nil {
+		return utilities.CheckForError(c, err, 500, "database", "no connection")
 	}
 
-	// Check for user is already sign up by given email.
-	_, _, errGetUserByEmail := db.GetUserByEmail(signUp.Email)
-	if errGetUserByEmail == nil {
-		// If user is found (err == nil), return status 400.
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": true,
-			"msg":   utilities.GenerateErrorMessage(400, "user", "email"),
-		})
+	// Check for user is already sign up by given email (err == nil).
+	foundedUser, status, err := db.GetUserByEmail(signUp.Email)
+	if err != nil {
+		return utilities.CheckForError(c, err, status, "user", err.Error())
+	}
+
+	// If user with given email is already sign up, return error.
+	if foundedUser.Email == signUp.Email {
+		return utilities.ThrowJSONError(c, 400, "user", "already signed up")
 	}
 
 	// Create a new user struct.
 	user := &models.User{}
 
 	// Generate a new username with nanoID.
-	randomUsername, errGenerateNewNanoID := utilities.GenerateNewNanoID("", 18)
-	if errGenerateNewNanoID != nil {
-		// Return status 500 and username generation error.
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": true,
-			"msg":   errGenerateNewNanoID.Error(),
-		})
+	randomUsername, err := utilities.GenerateNewNanoID("", 18)
+	if err != nil {
+		return utilities.CheckForError(c, err, 500, "nanoid", "fail generation")
 	}
 
 	// Set user data:
@@ -96,30 +82,18 @@ func UserSignUp(c *fiber.Ctx) error {
 
 	// Validate user fields.
 	if err := validate.Struct(user); err != nil {
-		// Return, if some fields are not valid.
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": true,
-			"msg":   utilities.ValidatorErrors(err),
-		})
+		return utilities.CheckForError(c, err, 400, "user", fmt.Sprintf("data is not valid, %v", err))
 	}
 
 	// Create a new user with validated data.
 	if err := db.CreateUser(user); err != nil {
-		// Return status 500 and create user process error.
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": true,
-			"msg":   err.Error(),
-		})
+		return utilities.CheckForError(c, err, 500, "user", fmt.Sprintf("wrong database inserting, %v", err))
 	}
 
 	// Generate a new activation code with nanoID.
-	randomActivationCode, errGenerateNewNanoID := utilities.GenerateNewNanoID(os.Getenv("RESET_CODES_CHARS_STRING"), 14)
-	if errGenerateNewNanoID != nil {
-		// Return status 500 and activation code generation error.
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": true,
-			"msg":   errGenerateNewNanoID.Error(),
-		})
+	randomActivationCode, err := utilities.GenerateNewNanoID(os.Getenv("RESET_CODES_CHARS_STRING"), 14)
+	if err != nil {
+		return utilities.CheckForError(c, err, 500, "nanoid", "fail generation")
 	}
 
 	// Create a new ResetCode struct for activation code.
@@ -132,20 +106,16 @@ func UserSignUp(c *fiber.Ctx) error {
 
 	// Validate activation code fields.
 	if err := validate.Struct(activationCode); err != nil {
-		// Return, if some fields are not valid.
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": true,
-			"msg":   utilities.ValidatorErrors(err),
-		})
+		return utilities.CheckForError(
+			c, err, 400, "activation code", fmt.Sprintf("data is not valid, %v", err),
+		)
 	}
 
 	// Create a new activation code with validated data.
 	if err := db.CreateResetCode(activationCode); err != nil {
-		// Return status 500 and create user process error.
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": true,
-			"msg":   err.Error(),
-		})
+		return utilities.CheckForError(
+			c, err, 500, "activation code", fmt.Sprintf("wrong database inserting, %v", err),
+		)
 	}
 
 	// Return status 201 created.
@@ -162,51 +132,31 @@ func UserSignIn(c *fiber.Ctx) error {
 
 	// Checking received data from JSON body.
 	if err := c.BodyParser(signIn); err != nil {
-		// Return status 400 and error message.
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": true,
-			"msg":   err.Error(),
-		})
+		return utilities.CheckForError(c, err, 400, "sign in", "wrong incoming data")
 	}
 
 	// Create database connection.
-	db, errOpenDBConnection := database.OpenDBConnection()
-	if errOpenDBConnection != nil {
-		// Return status 500 and database connection error.
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": true,
-			"msg":   errOpenDBConnection.Error(),
-		})
+	db, err := database.OpenDBConnection()
+	if err != nil {
+		return utilities.CheckForError(c, err, 500, "database", "no connection")
 	}
 
 	// Get user by given email.
-	foundedUser, status, errGetUserByEmail := db.GetUserByEmail(signIn.Email)
-	if errGetUserByEmail != nil {
-		// Return status and error message.
-		return c.Status(status).JSON(fiber.Map{
-			"error": true,
-			"msg":   errGetUserByEmail.Error(),
-		})
+	foundedUser, status, err := db.GetUserByEmail(signIn.Email)
+	if err != nil {
+		return utilities.CheckForError(c, err, status, "user", err.Error())
 	}
 
 	// Compare given user password with stored in found user.
 	compareUserPassword := utilities.ComparePasswords(foundedUser.PasswordHash, signIn.Password)
 	if !compareUserPassword {
-		// Return status 403, if password is not compare to stored in database.
-		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
-			"error": true,
-			"msg":   utilities.GenerateErrorMessage(403, "auth", "email or password"),
-		})
+		return utilities.CheckForError(c, err, 403, "auth", "email or password")
 	}
 
 	// Generate a new pair of access and refresh tokens.
-	tokens, errGenerateNewTokens := helpers.GenerateNewTokens(foundedUser.ID.String(), foundedUser.UserRole)
-	if errGenerateNewTokens != nil {
-		// Return status 500 and token generation error.
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": true,
-			"msg":   errGenerateNewTokens.Error(),
-		})
+	tokens, err := helpers.GenerateNewTokens(foundedUser.ID.String(), foundedUser.UserRole)
+	if err != nil {
+		return utilities.CheckForError(c, err, 400, "tokens", "failed to generate tokens")
 	}
 
 	// Define user ID.
@@ -235,21 +185,13 @@ func UserSignIn(c *fiber.Ctx) error {
 	// Set expires minutes count for secret key from .env file.
 	minutesCount, err := strconv.Atoi(os.Getenv("JWT_SECRET_KEY_EXPIRE_MINUTES_COUNT"))
 	if err != nil {
-		// Return status 500 and Redis connection error.
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": true,
-			"msg":   err.Error(),
-		})
+		return utilities.CheckForError(c, err, 500, "minutes count", err.Error())
 	}
 
 	// Set expires hours count for refresh key from .env file.
 	hoursCount, err := strconv.Atoi(os.Getenv("JWT_REFRESH_KEY_EXPIRE_HOURS_COUNT"))
 	if err != nil {
-		// Return status 500 and Redis connection error.
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": true,
-			"msg":   err.Error(),
-		})
+		return utilities.CheckForError(c, err, 500, "hours count", err.Error())
 	}
 
 	// Set HttpOnly cookie with refresh token.
@@ -275,13 +217,9 @@ func UserSignIn(c *fiber.Ctx) error {
 // UserSignOut method to de-authorize user and delete refresh token from Redis.
 func UserSignOut(c *fiber.Ctx) error {
 	// Get claims from JWT.
-	_, errExtractTokenMetaData := utilities.ExtractTokenMetaData(c)
-	if errExtractTokenMetaData != nil {
-		// Return status 500 and JWT parse error.
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": true,
-			"msg":   errExtractTokenMetaData.Error(),
-		})
+	_, err := utilities.ExtractTokenMetaData(c)
+	if err != nil {
+		return utilities.CheckForError(c, err, 500, "jwt", fmt.Sprintf("failed extraction, %v", err))
 	}
 
 	// Define user ID.
