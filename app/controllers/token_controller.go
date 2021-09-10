@@ -29,7 +29,7 @@ func RenewTokens(c *fiber.Ctx) error {
 	// Set expiration time from Refresh token of current user.
 	userID, expires, err := helpers.ParseRefreshToken(oldRefreshToken)
 	if err != nil {
-		return utilities.CheckForError(c, err, 400, "refresh token", "wrong incoming data")
+		return utilities.CheckForError(c, err, 400, "refresh token", err.Error())
 	}
 
 	// Checking, if now time greather than Refresh token expiration time.
@@ -37,7 +37,7 @@ func RenewTokens(c *fiber.Ctx) error {
 		// Create database connection.
 		db, err := database.OpenDBConnection()
 		if err != nil {
-			return utilities.CheckForError(c, err, 500, "database", "no connection")
+			return utilities.CheckForError(c, err, 500, "database", err.Error())
 		}
 
 		// Get user by ID.
@@ -114,6 +114,6 @@ func RenewTokens(c *fiber.Ctx) error {
 		})
 	} else {
 		// Return status 401 and unauthorized error message.
-		return utilities.ThrowJSONError(c, 401, "token", "refresh token is expire")
+		return utilities.ThrowJSONError(c, 401, "refresh token", "was expired")
 	}
 }

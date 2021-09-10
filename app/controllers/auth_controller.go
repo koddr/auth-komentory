@@ -151,7 +151,7 @@ func UserSignIn(c *fiber.Ctx) error {
 	// Compare given user password with stored in found user.
 	compareUserPassword := utilities.ComparePasswords(foundedUser.PasswordHash, signIn.Password)
 	if !compareUserPassword {
-		return utilities.CheckForError(c, err, 403, "auth", "email or password")
+		return utilities.ThrowJSONError(c, 403, "auth", "email or password")
 	}
 
 	// Generate a new pair of access and refresh tokens.
@@ -217,10 +217,10 @@ func UserSignIn(c *fiber.Ctx) error {
 
 // UserSignOut method to de-authorize user and delete refresh token from Redis.
 func UserSignOut(c *fiber.Ctx) error {
-	// Get claims from JWT.
-	_, err := utilities.ExtractTokenMetaData(c)
+	// Check data from JWT.
+	_, err := utilities.TokenValidateExpireTime(c)
 	if err != nil {
-		return utilities.CheckForError(c, err, 500, "jwt", fmt.Sprintf("failed extraction, %v", err))
+		return utilities.CheckForError(c, err, 401, "jwt", err.Error())
 	}
 
 	// Define user ID.

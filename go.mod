@@ -3,7 +3,7 @@ module Komentory/auth
 go 1.17
 
 require (
-	github.com/Komentory/utilities v0.2.1
+	github.com/Komentory/utilities v0.2.2
 	github.com/gofiber/fiber/v2 v2.18.0
 	github.com/gofiber/jwt/v2 v2.2.7
 	github.com/golang-jwt/jwt/v4 v4.0.0
@@ -35,7 +35,7 @@ require (
 	github.com/valyala/fasthttp v1.30.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
 	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5 // indirect
-	golang.org/x/sys v0.0.0-20210908233432-aa78b53d3365 // indirect
+	golang.org/x/sys v0.0.0-20210909193231-528a39cd75f3 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )
