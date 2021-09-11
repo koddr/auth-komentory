@@ -122,6 +122,7 @@ func UserSignUp(c *fiber.Ctx) error {
 	// Return status 201 created.
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"error":           false,
+		"status":          fiber.StatusCreated,
 		"activation_code": randomActivationCode,
 	})
 }
@@ -207,7 +208,8 @@ func UserSignIn(c *fiber.Ctx) error {
 
 	// Return status 200 OK.
 	return c.JSON(fiber.Map{
-		"error": false,
+		"error":  false,
+		"status": fiber.StatusOK,
 		"jwt": fiber.Map{
 			"expire": time.Now().Add(time.Minute * time.Duration(minutesCount)).Unix(),
 			"token":  tokens.Access,
