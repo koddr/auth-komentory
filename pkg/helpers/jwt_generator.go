@@ -85,7 +85,7 @@ func generateNewAccessToken(id string, role int) (string, error) {
 
 	// Set public claims:
 	claims["id"] = id
-	claims["expires"] = time.Now().Add(time.Minute * time.Duration(minutesCount)).Unix()
+	claims["expire"] = time.Now().Add(time.Minute * time.Duration(minutesCount)).Unix()
 	claims["credentials"] = credentials
 
 	// Create a new JWT access token with claims.

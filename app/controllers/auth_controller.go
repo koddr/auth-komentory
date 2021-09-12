@@ -22,7 +22,7 @@ func UserSignUp(c *fiber.Ctx) error {
 
 	// Checking received data from JSON body.
 	if err := c.BodyParser(signUp); err != nil {
-		return utilities.CheckForError(c, err, 400, "sign up", "wrong incoming data")
+		return utilities.CheckForError(c, err, 400, "sign up", err.Error())
 	}
 
 	// Create a new validator for a User model.
@@ -36,7 +36,7 @@ func UserSignUp(c *fiber.Ctx) error {
 	// Create database connection.
 	db, err := database.OpenDBConnection()
 	if err != nil {
-		return utilities.CheckForError(c, err, 500, "database", "no connection")
+		return utilities.CheckForError(c, err, 500, "database", err.Error())
 	}
 
 	// Check for user is already sign up by given email.
@@ -57,7 +57,7 @@ func UserSignUp(c *fiber.Ctx) error {
 	// Generate a new username with nanoID.
 	randomUsername, err := utilities.GenerateNewNanoID("", 18)
 	if err != nil {
-		return utilities.CheckForError(c, err, 500, "nanoid", "fail generation")
+		return utilities.CheckForError(c, err, 500, "nanoid", err.Error())
 	}
 
 	// Set user data:
@@ -88,13 +88,13 @@ func UserSignUp(c *fiber.Ctx) error {
 
 	// Create a new user with validated data.
 	if err := db.CreateUser(user); err != nil {
-		return utilities.CheckForError(c, err, 500, "user", fmt.Sprintf("wrong database inserting, %v", err))
+		return utilities.CheckForError(c, err, 500, "user", err.Error())
 	}
 
 	// Generate a new activation code with nanoID.
 	randomActivationCode, err := utilities.GenerateNewNanoID(os.Getenv("RESET_CODES_CHARS_STRING"), 14)
 	if err != nil {
-		return utilities.CheckForError(c, err, 500, "nanoid", "fail generation")
+		return utilities.CheckForError(c, err, 500, "nanoid", err.Error())
 	}
 
 	// Create a new ResetCode struct for activation code.
@@ -107,16 +107,12 @@ func UserSignUp(c *fiber.Ctx) error {
 
 	// Validate activation code fields.
 	if err := validate.Struct(activationCode); err != nil {
-		return utilities.CheckForError(
-			c, err, 400, "activation code", fmt.Sprintf("data is not valid, %v", err),
-		)
+		return utilities.CheckForError(c, err, 400, "activation code", err.Error())
 	}
 
 	// Create a new activation code with validated data.
 	if err := db.CreateResetCode(activationCode); err != nil {
-		return utilities.CheckForError(
-			c, err, 500, "activation code", fmt.Sprintf("wrong database inserting, %v", err),
-		)
+		return utilities.CheckForError(c, err, 500, "activation code", err.Error())
 	}
 
 	// Return status 201 created.
@@ -133,13 +129,13 @@ func UserSignIn(c *fiber.Ctx) error {
 
 	// Checking received data from JSON body.
 	if err := c.BodyParser(signIn); err != nil {
-		return utilities.CheckForError(c, err, 400, "sign in", "wrong incoming data")
+		return utilities.CheckForError(c, err, 400, "sign in", err.Error())
 	}
 
 	// Create database connection.
 	db, err := database.OpenDBConnection()
 	if err != nil {
-		return utilities.CheckForError(c, err, 500, "database", "no connection")
+		return utilities.CheckForError(c, err, 500, "database", err.Error())
 	}
 
 	// Get user by given email.
@@ -151,13 +147,13 @@ func UserSignIn(c *fiber.Ctx) error {
 	// Compare given user password with stored in found user.
 	compareUserPassword := utilities.ComparePasswords(foundedUser.PasswordHash, signIn.Password)
 	if !compareUserPassword {
-		return utilities.ThrowJSONError(c, 403, "auth", "email or password")
+		return utilities.ThrowJSONError(c, 403, "sign in", "email or password")
 	}
 
 	// Generate a new pair of access and refresh tokens.
 	tokens, err := helpers.GenerateNewTokens(foundedUser.ID.String(), foundedUser.UserRole)
 	if err != nil {
-		return utilities.CheckForError(c, err, 400, "tokens", "failed to generate tokens")
+		return utilities.CheckForError(c, err, 400, "tokens", err.Error())
 	}
 
 	// Define user ID.
@@ -217,12 +213,6 @@ func UserSignIn(c *fiber.Ctx) error {
 
 // UserSignOut method to de-authorize user and delete refresh token from Redis.
 func UserSignOut(c *fiber.Ctx) error {
-	// Check data from JWT.
-	_, err := utilities.TokenValidateExpireTime(c)
-	if err != nil {
-		return utilities.CheckForError(c, err, 401, "jwt", err.Error())
-	}
-
 	// Define user ID.
 	// userID := claims.UserID.String()
 

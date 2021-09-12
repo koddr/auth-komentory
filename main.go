@@ -24,7 +24,6 @@ func main() {
 
 	// Routes.
 	routes.PublicRoutes(app)  // Register a public routes for app.
-	routes.PrivateRoutes(app) // Register a private routes for app.
 	routes.NotFoundRoute(app) // Register route for 404 Error.
 
 	// Start server (with or without graceful shutdown).

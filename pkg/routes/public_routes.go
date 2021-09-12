@@ -13,6 +13,7 @@ func PublicRoutes(a *fiber.App) {
 
 	// Routes for POST method:
 	route.Post("/sign/in", controllers.UserSignIn)      // auth, return Access & Refresh tokens
+	route.Post("/sign/out", controllers.UserSignOut)    // de-authorization user
 	route.Post("/token/renew", controllers.RenewTokens) // renew Access & Refresh tokens
 
 	// Routes for PUT method:
