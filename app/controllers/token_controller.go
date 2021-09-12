@@ -20,7 +20,7 @@ func RenewTokens(c *fiber.Ctx) error {
 	// If no refresh token in request.
 	if oldRefreshToken == "" {
 		// Return status 401 and unauthorized error message.
-		return utilities.ThrowJSONError(c, 401, "token", "refresh token is missing")
+		return utilities.ThrowJSONErrorWithStatusCode(c, 401, "token", "refresh token is missing")
 	}
 
 	// Get now time.
@@ -37,19 +37,19 @@ func RenewTokens(c *fiber.Ctx) error {
 		// Create database connection.
 		db, err := database.OpenDBConnection()
 		if err != nil {
-			return utilities.CheckForError(c, err, 500, "database", err.Error())
+			return utilities.CheckForErrorWithStatusCode(c, err, 500, "database", err.Error())
 		}
 
 		// Get user by ID.
 		foundedUser, status, err := db.GetUserByID(userID)
 		if err != nil {
-			return utilities.CheckForError(c, err, status, "user", err.Error())
+			return utilities.CheckForErrorWithStatusCode(c, err, status, "user", err.Error())
 		}
 
 		// Generate JWT Access & Refresh tokens.
 		tokens, err := helpers.GenerateNewTokens(userID.String(), foundedUser.UserRole)
 		if err != nil {
-			return utilities.CheckForError(c, err, 500, "jwt", err.Error())
+			return utilities.CheckForError(c, err, 400, "jwt", err.Error())
 		}
 
 		// Create a new Redis connection.
@@ -114,6 +114,6 @@ func RenewTokens(c *fiber.Ctx) error {
 		})
 	} else {
 		// Return status 401 and unauthorized error message.
-		return utilities.ThrowJSONError(c, 401, "refresh token", "was expired")
+		return utilities.ThrowJSONErrorWithStatusCode(c, 401, "refresh token", "was expired")
 	}
 }

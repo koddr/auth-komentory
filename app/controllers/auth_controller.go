@@ -30,25 +30,25 @@ func UserSignUp(c *fiber.Ctx) error {
 
 	// Validate sign up fields.
 	if err := validate.Struct(signUp); err != nil {
-		return utilities.CheckForError(c, err, 400, "sign up", fmt.Sprintf("data is not valid, %v", err))
+		return utilities.CheckForError(c, err, 400, "sign up", fmt.Sprintf("validation error, %v", err))
 	}
 
 	// Create database connection.
 	db, err := database.OpenDBConnection()
 	if err != nil {
-		return utilities.CheckForError(c, err, 500, "database", err.Error())
+		return utilities.CheckForErrorWithStatusCode(c, err, 500, "database", err.Error())
 	}
 
 	// Check for user is already sign up by given email.
 	// If status is 404, user is not signed up.
 	foundedUser, status, err := db.GetUserByEmail(signUp.Email)
 	if err != nil && status != 404 {
-		return utilities.CheckForError(c, err, status, "user", err.Error())
+		return utilities.CheckForErrorWithStatusCode(c, err, status, "user", err.Error())
 	}
 
 	// If user with given email is already sign up, return error.
 	if foundedUser.Email == signUp.Email {
-		return utilities.ThrowJSONError(c, 400, "user", "already signed up")
+		return utilities.ThrowJSONErrorWithStatusCode(c, 400, "user", "already signed up")
 	}
 
 	// Create a new user struct.
@@ -83,12 +83,12 @@ func UserSignUp(c *fiber.Ctx) error {
 
 	// Validate user fields.
 	if err := validate.Struct(user); err != nil {
-		return utilities.CheckForError(c, err, 400, "user", fmt.Sprintf("data is not valid, %v", err))
+		return utilities.CheckForError(c, err, 400, "user", fmt.Sprintf("validation error, %v", err))
 	}
 
 	// Create a new user with validated data.
 	if err := db.CreateUser(user); err != nil {
-		return utilities.CheckForError(c, err, 500, "user", err.Error())
+		return utilities.CheckForErrorWithStatusCode(c, err, 400, "user", err.Error())
 	}
 
 	// Generate a new activation code with nanoID.
@@ -107,12 +107,14 @@ func UserSignUp(c *fiber.Ctx) error {
 
 	// Validate activation code fields.
 	if err := validate.Struct(activationCode); err != nil {
-		return utilities.CheckForError(c, err, 400, "activation code", err.Error())
+		return utilities.CheckForError(
+			c, err, 400, "activation code", fmt.Sprintf("validation error, %v", err),
+		)
 	}
 
 	// Create a new activation code with validated data.
 	if err := db.CreateResetCode(activationCode); err != nil {
-		return utilities.CheckForError(c, err, 500, "activation code", err.Error())
+		return utilities.CheckForErrorWithStatusCode(c, err, 500, "activation code", err.Error())
 	}
 
 	// Return status 201 created.
@@ -135,19 +137,19 @@ func UserSignIn(c *fiber.Ctx) error {
 	// Create database connection.
 	db, err := database.OpenDBConnection()
 	if err != nil {
-		return utilities.CheckForError(c, err, 500, "database", err.Error())
+		return utilities.CheckForErrorWithStatusCode(c, err, 500, "database", err.Error())
 	}
 
 	// Get user by given email.
 	foundedUser, status, err := db.GetUserByEmail(signIn.Email)
 	if err != nil {
-		return utilities.CheckForError(c, err, status, "user", err.Error())
+		return utilities.CheckForErrorWithStatusCode(c, err, status, "user", err.Error())
 	}
 
 	// Compare given user password with stored in found user.
 	compareUserPassword := utilities.ComparePasswords(foundedUser.PasswordHash, signIn.Password)
 	if !compareUserPassword {
-		return utilities.ThrowJSONError(c, 403, "sign in", "email or password")
+		return utilities.ThrowJSONErrorWithStatusCode(c, 403, "sign in", "email or password")
 	}
 
 	// Generate a new pair of access and refresh tokens.

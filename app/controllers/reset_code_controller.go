@@ -26,37 +26,37 @@ func ActivateAccount(c *fiber.Ctx) error {
 	// Create database connection.
 	db, err := database.OpenDBConnection()
 	if err != nil {
-		return utilities.CheckForError(c, err, 500, "database", err.Error())
+		return utilities.CheckForErrorWithStatusCode(c, err, 500, "database", err.Error())
 	}
 
 	// Get code by given string.
 	foundedCode, status, err := db.GetResetCode(activationCode.Code)
 	if err != nil {
-		return utilities.CheckForError(c, err, status, "activation code", err.Error())
+		return utilities.CheckForErrorWithStatusCode(c, err, status, "activation code", err.Error())
 	}
 
 	// Checking, if now time greather than activation code expiration time.
 	if now < foundedCode.ExpireAt.Unix() {
 		// Get user by given ID.
-		foundedUser, status, errGetUserByID := db.GetUserByID(foundedCode.UserID)
-		if errGetUserByID != nil {
-			return utilities.CheckForError(c, err, status, "user", err.Error())
+		foundedUser, status, err := db.GetUserByID(foundedCode.UserID)
+		if err != nil {
+			return utilities.CheckForErrorWithStatusCode(c, err, status, "user", err.Error())
 		}
 
 		// Update user status to 1 (active).
 		if err := db.UpdateUserStatus(foundedUser.ID); err != nil {
-			return utilities.CheckForError(c, err, 400, "user", err.Error())
+			return utilities.CheckForErrorWithStatusCode(c, err, 400, "user", err.Error())
 		}
 
 		// Delete activation code.
 		if err := db.DeleteResetCode(activationCode.Code); err != nil {
-			return utilities.CheckForError(c, err, 400, "activation code", err.Error())
+			return utilities.CheckForErrorWithStatusCode(c, err, 400, "activation code", err.Error())
 		}
 
 		// Return status 204 no content.
 		return c.SendStatus(fiber.StatusNoContent)
 	} else {
 		// Return status 400 and bad request error message.
-		return utilities.ThrowJSONError(c, 403, "activation code", "was expired")
+		return utilities.ThrowJSONErrorWithStatusCode(c, 403, "activation code", "was expired")
 	}
 }

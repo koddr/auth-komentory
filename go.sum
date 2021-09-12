@@ -1,6 +1,6 @@
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
-github.com/Komentory/utilities v0.3.2 h1:tHRZoZZdERbN/gC/a5XmfRAWI4jU01bjIH4qjUQV/nk=
-github.com/Komentory/utilities v0.3.2/go.mod h1:+cyPw8y6jBVP2/zHbnS5veb8nA7cLdHzcKsL4u/bSq0=
+github.com/Komentory/utilities v0.4.0 h1:try8eWTSRhrEPefAh2aGU7xira4OviGxShoL6eFkl7g=
+github.com/Komentory/utilities v0.4.0/go.mod h1:+cyPw8y6jBVP2/zHbnS5veb8nA7cLdHzcKsL4u/bSq0=
 github.com/Masterminds/semver/v3 v3.1.1 h1:hLg3sBzpNErnxhQtUy/mmLR2I9foDujNK030IGemrRc=
 github.com/Masterminds/semver/v3 v3.1.1/go.mod h1:VPu/7SZ7ePZ3QOrcuXROw5FAcLl4a0cBrbBpGY/8hQs=
 github.com/andybalholm/brotli v1.0.2/go.mod h1:loMXtMfwqflxFJPmdbJO0a3KNoPuLBgiu3qAvBg8x/Y=
