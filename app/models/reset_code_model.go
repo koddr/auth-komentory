@@ -1,19 +1,20 @@
 package models
 
-import (
-	"time"
-
-	"github.com/google/uuid"
-)
+import "time"
 
 // ResetCode struct to describe reset codes object.
 type ResetCode struct {
 	Code     string    `db:"code" json:"code" validate:"required"`
 	ExpireAt time.Time `db:"expire_at" json:"expire_at" validate:"required"`
-	UserID   uuid.UUID `db:"user_id" json:"user_id" validate:"required,uuid"`
+	Email    string    `json:"email" validate:"required,email"`
 }
 
-// ActivationCode struct to describe activation code object.
-type ActivationCode struct {
+// ResetPassword struct to describe forgot password object.
+type ForgotPassword struct {
+	Email string `json:"email" validate:"required,email"`
+}
+
+// ResetPassword struct to describe reset password object.
+type ResetPassword struct {
 	Code string `json:"code" validate:"required"`
 }

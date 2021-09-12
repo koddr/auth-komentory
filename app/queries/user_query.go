@@ -121,3 +121,23 @@ func (q *UserQueries) UpdateUserStatus(id uuid.UUID) error {
 	// This query returns nothing.
 	return nil
 }
+
+// UpdateUserPassword query for updating user password by given user ID.
+func (q *UserQueries) UpdateUserPassword(id uuid.UUID, password_hash string) error {
+	// Define query string.
+	query := `
+	UPDATE users 
+	SET password_hash = $2::varchar 
+	WHERE id = $1::uuid
+	`
+
+	// Send query to database.
+	_, err := q.Exec(query, id, password_hash)
+	if err != nil {
+		// Return only error.
+		return err
+	}
+
+	// This query returns nothing.
+	return nil
+}

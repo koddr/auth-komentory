@@ -10,16 +10,16 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// ActivateAccount method for activate user account by code.
+// ActivateAccount method for activate user account by given code.
 func ActivateAccount(c *fiber.Ctx) error {
 	// Get now time.
 	now := time.Now().Unix()
 
 	// Create a new activation code struct.
-	activationCode := &models.ActivationCode{}
+	activateAccount := &models.ActivateAccount{}
 
 	// Checking received data from JSON body.
-	if err := c.BodyParser(activationCode); err != nil {
+	if err := c.BodyParser(activateAccount); err != nil {
 		return utilities.CheckForError(c, err, 400, "activation code", err.Error())
 	}
 
@@ -30,7 +30,7 @@ func ActivateAccount(c *fiber.Ctx) error {
 	}
 
 	// Get code by given string.
-	foundedCode, status, err := db.GetResetCode(activationCode.Code)
+	foundedCode, status, err := db.GetActivationCode(activateAccount.Code)
 	if err != nil {
 		return utilities.CheckForErrorWithStatusCode(c, err, status, "activation code", err.Error())
 	}
@@ -49,14 +49,21 @@ func ActivateAccount(c *fiber.Ctx) error {
 		}
 
 		// Delete activation code.
-		if err := db.DeleteResetCode(activationCode.Code); err != nil {
+		if err := db.DeleteActivationCode(activateAccount.Code); err != nil {
 			return utilities.CheckForErrorWithStatusCode(c, err, 400, "activation code", err.Error())
 		}
 
-		// Return status 204 no content.
-		return c.SendStatus(fiber.StatusNoContent)
+		// Return status 200 OK.
+		// User info returns for sending welcome email by Postmark.
+		return c.JSON(fiber.Map{
+			"status": fiber.StatusOK,
+			"user": fiber.Map{
+				"email":      foundedUser.Email,
+				"first_name": foundedUser.UserAttrs.FirstName,
+			},
+		})
 	} else {
-		// Return status 400 and bad request error message.
+		// Return status 403 and forbidden error message.
 		return utilities.ThrowJSONErrorWithStatusCode(c, 403, "activation code", "was expired")
 	}
 }

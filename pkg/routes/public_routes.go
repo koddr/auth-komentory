@@ -17,8 +17,10 @@ func PublicRoutes(a *fiber.App) {
 	route.Post("/token/renew", controllers.RenewTokens) // renew Access & Refresh tokens
 
 	// Routes for PUT method:
-	route.Put("/sign/up", controllers.UserSignUp) // register a new user
+	route.Put("/sign/up", controllers.UserSignUp)                     // register a new user
+	route.Put("/account/password/forgot", controllers.ForgotPassword) // create reset password code
 
 	// Routes for PATCH method:
-	route.Patch("/account/activate", controllers.ActivateAccount) // activate account by code
+	route.Patch("/account/activate", controllers.ActivateAccount)     // activate account by code
+	route.Patch("/account/password/reset", controllers.ResetPassword) // reset password by code
 }

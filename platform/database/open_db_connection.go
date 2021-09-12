@@ -8,8 +8,9 @@ import (
 
 // Queries struct for collect all app queries.
 type Queries struct {
-	*queries.UserQueries      // load queries from User model
-	*queries.ResetCodeQueries // load queries from ResetCode model
+	*queries.UserQueries           // load queries from User model
+	*queries.ActivationCodeQueries // load queries from ActivationCode model
+	*queries.ResetCodeQueries      // load queries from ResetCode model
 }
 
 // OpenDBConnection func for opening database connection.
@@ -22,7 +23,8 @@ func OpenDBConnection() (*Queries, error) {
 
 	return &Queries{
 		// Set queries from models:
-		UserQueries:      &queries.UserQueries{DB: db},      // from User model
-		ResetCodeQueries: &queries.ResetCodeQueries{DB: db}, // from ResetCode model
+		UserQueries:           &queries.UserQueries{DB: db},           // from User model
+		ActivationCodeQueries: &queries.ActivationCodeQueries{DB: db}, // from ActivationCode model
+		ResetCodeQueries:      &queries.ResetCodeQueries{DB: db},      // from ResetCode model
 	}, nil
 }

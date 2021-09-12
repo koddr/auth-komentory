@@ -98,7 +98,7 @@ func UserSignUp(c *fiber.Ctx) error {
 	}
 
 	// Create a new ResetCode struct for activation code.
-	activationCode := &models.ResetCode{}
+	activationCode := &models.ActivationCode{}
 
 	// Set data for activation code:
 	activationCode.Code = randomActivationCode
@@ -113,7 +113,7 @@ func UserSignUp(c *fiber.Ctx) error {
 	}
 
 	// Create a new activation code with validated data.
-	if err := db.CreateResetCode(activationCode); err != nil {
+	if err := db.CreateNewActivationCode(activationCode); err != nil {
 		return utilities.CheckForErrorWithStatusCode(c, err, 500, "activation code", err.Error())
 	}
 
