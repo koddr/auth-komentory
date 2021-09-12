@@ -20,7 +20,7 @@ func RenewTokens(c *fiber.Ctx) error {
 	// If no refresh token in request.
 	if oldRefreshToken == "" {
 		// Return status 401 and unauthorized error message.
-		return utilities.ThrowJSONErrorWithStatusCode(c, 401, "token", "refresh token is missing")
+		return utilities.ThrowJSONError(c, 401, "token", "refresh token is missing")
 	}
 
 	// Get now time.
@@ -43,7 +43,7 @@ func RenewTokens(c *fiber.Ctx) error {
 		// Get user by ID.
 		foundedUser, status, err := db.GetUserByID(userID)
 		if err != nil {
-			return utilities.CheckForErrorWithStatusCode(c, err, status, "user", err.Error())
+			return utilities.CheckForError(c, err, status, "user", err.Error())
 		}
 
 		// Generate JWT Access & Refresh tokens.
@@ -114,6 +114,6 @@ func RenewTokens(c *fiber.Ctx) error {
 		})
 	} else {
 		// Return status 401 and unauthorized error message.
-		return utilities.ThrowJSONErrorWithStatusCode(c, 401, "refresh token", "was expired")
+		return utilities.ThrowJSONError(c, 401, "refresh token", "was expired")
 	}
 }
