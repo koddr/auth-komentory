@@ -84,3 +84,22 @@ func (q *ResetCodeQueries) DeleteResetCode(code string) error {
 	// This query returns nothing.
 	return nil
 }
+
+// DeleteResetCodesByEmail query for deleting all reset codes for the given email.
+func (q *ResetCodeQueries) DeleteResetCodesByEmail(email string) error {
+	// Define query string.
+	query := `
+	DELETE FROM reset_codes 
+	WHERE email = $1::varchar
+	`
+
+	// Send query to database.
+	_, err := q.Exec(query, email)
+	if err != nil {
+		// Return only error.
+		return err
+	}
+
+	// This query returns nothing.
+	return nil
+}

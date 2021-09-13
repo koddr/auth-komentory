@@ -46,6 +46,12 @@ func ForgotPassword(c *fiber.Ctx) error {
 		return utilities.CheckForErrorWithStatusCode(c, err, status, "user", err.Error())
 	}
 
+	// Deleting all previously created reset codes for the given email.
+	err = db.DeleteResetCodesByEmail(foundedUser.Email)
+	if err != nil {
+		return utilities.CheckForErrorWithStatusCode(c, err, 400, "reset code", err.Error())
+	}
+
 	// Generate a new reset code with nanoID.
 	randomResetCode, err := utilities.GenerateNewNanoID(os.Getenv("RESET_CODES_CHARS_STRING"), 14)
 	if err != nil {
