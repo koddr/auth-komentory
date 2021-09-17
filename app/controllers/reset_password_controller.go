@@ -14,8 +14,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// ForgotPassword method to create a new request to reset user password by given email.
-func ForgotPassword(c *fiber.Ctx) error {
+// CreateNewResetCode method to create a new request to reset user password by given email.
+func CreateNewResetCode(c *fiber.Ctx) error {
 	// Create a new user auth struct.
 	forgotPassword := &models.ForgotPassword{}
 
@@ -185,6 +185,12 @@ func ResetPassword(c *fiber.Ctx) error {
 			HTTPOnly: true,
 		})
 
+		// Clear no needed fields from JSON output.
+		foundedUser.CreatedAt = nil
+		foundedUser.UpdatedAt = nil
+		foundedUser.PasswordHash = ""
+		foundedUser.UserRole = 0
+
 		// Return status 200 OK.
 		// User is authenticated automatically.
 		return c.JSON(fiber.Map{
@@ -193,6 +199,7 @@ func ResetPassword(c *fiber.Ctx) error {
 				"expire": time.Now().Add(time.Minute * time.Duration(minutesCount)).Unix(),
 				"token":  tokens.Access,
 			},
+			"user": foundedUser,
 		})
 	} else {
 		// Return status 403 and forbidden error message.

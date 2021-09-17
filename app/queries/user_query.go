@@ -141,3 +141,23 @@ func (q *UserQueries) UpdateUserPassword(id uuid.UUID, password_hash string) err
 	// This query returns nothing.
 	return nil
 }
+
+// UpdateUserAttrs query for updating user attrs by given user ID.
+func (q *UserQueries) UpdateUserAttrs(id uuid.UUID, u *models.UserAttrs) error {
+	// Define query string.
+	query := `
+	UPDATE users 
+	SET user_attrs = $2::jsonb 
+	WHERE id = $1::uuid
+	`
+
+	// Send query to database.
+	_, err := q.Exec(query, id, u)
+	if err != nil {
+		// Return only error.
+		return err
+	}
+
+	// This query returns nothing.
+	return nil
+}

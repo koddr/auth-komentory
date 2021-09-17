@@ -45,6 +45,16 @@ type EmailSubscriptions struct {
 }
 
 // ---
+// Methods to update user attributes & settings.
+// ---
+
+// UpdateUserPassword struct to describe updating user password.
+type UpdateUserPassword struct {
+	OldPassword string `json:"old_password" validate:"required"`
+	NewPassword string `json:"new_password" validate:"required"`
+}
+
+// ---
 // This methods simply returns the JSON-encoded representation of the struct.
 // ---
 
