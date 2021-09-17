@@ -12,30 +12,36 @@ import (
 // User struct to describe User object.
 type User struct {
 	ID           uuid.UUID    `db:"id" json:"id" validate:"required,uuid"`
-	CreatedAt    time.Time    `db:"created_at" json:"created_at"`
-	UpdatedAt    time.Time    `db:"updated_at" json:"updated_at"`
+	CreatedAt    *time.Time   `db:"created_at" json:"created_at,omitempty"` // pointer to time.Time for omitempty
+	UpdatedAt    *time.Time   `db:"updated_at" json:"updated_at,omitempty"` // pointer to time.Time for omitempty
 	Email        string       `db:"email" json:"email" validate:"required,email,lte=255"`
 	PasswordHash string       `db:"password_hash" json:"password_hash,omitempty" validate:"required,lte=64"`
 	Username     string       `db:"username" json:"username" validate:"required,lte=18"`
 	UserStatus   int          `db:"user_status" json:"user_status" validate:"int"`
-	UserRole     int          `db:"user_role" json:"user_role" validate:"required,int"`
+	UserRole     int          `db:"user_role" json:"user_role,omitempty" validate:"required,int"`
 	UserAttrs    UserAttrs    `db:"user_attrs" json:"user_attrs" validate:"required,dive"`
 	UserSettings UserSettings `db:"user_settings" json:"user_settings" validate:"required,dive"`
 }
 
 // UserAttrs struct to describe user attributes.
 type UserAttrs struct {
-	FirstName  string `json:"first_name" validate:"required"`
-	LastName   string `json:"last_name"`
-	AboutMe    string `json:"about_me"`
-	Picture    string `json:"picture"`
-	WebsiteURL string `json:"website_url"`
+	FirstName  string   `json:"first_name" validate:"required"`
+	LastName   string   `json:"last_name"`
+	AboutMe    string   `json:"about_me"`
+	Picture    string   `json:"picture"`
+	WebsiteURL string   `json:"website_url"`
+	Abilities  []string `json:"abilities"`
 }
 
 // UserSettings struct to describe user settings.
 type UserSettings struct {
-	TransactionalEmailSubscription bool `json:"transactional_email_subscription"` // like "forgot password"
-	MarketingEmailSubscription     bool `json:"marketing_email_subscription"`     // like "invite friends and get X"
+	EmailSubscriptions EmailSubscriptions `json:"email_subscriptions" validate:"dive"`
+}
+
+// EmailSubscriptions struct to describe user settings > email subscriptions.
+type EmailSubscriptions struct {
+	Transactional bool `json:"transactional"` // like "forgot password"
+	Marketing     bool `json:"marketing"`     // like "invite friends and get X"
 }
 
 // ---

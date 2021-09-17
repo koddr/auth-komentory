@@ -60,16 +60,19 @@ func UserSignUp(c *fiber.Ctx) error {
 		return utilities.CheckForError(c, err, 500, "nanoid", err.Error())
 	}
 
+	// Create a new variable for timestamp, because time fields in User model are pointers.
+	now := time.Now()
+
 	// Set user data:
 	user.ID = uuid.New()
-	user.CreatedAt = time.Now()
+	user.CreatedAt = &now
 	user.Email = signUp.Email
 	user.PasswordHash = utilities.GeneratePassword(signUp.Password)
 	user.Username = randomUsername
 	user.UserStatus = 0 // 0 == unconfirmed, 1 == active, 2 == blocked
 	user.UserRole = utilities.RoleNameUser
 	user.UserAttrs.FirstName = signUp.UserAttrs.FirstName
-	user.UserSettings.TransactionalEmailSubscription = true
+	user.UserSettings.EmailSubscriptions.Transactional = true
 
 	// Set optional user data:
 	if signUp.UserAttrs.LastName != "" {
@@ -78,7 +81,7 @@ func UserSignUp(c *fiber.Ctx) error {
 
 	// Set optional user settings:
 	if signUp.UserSettings.MarketingEmailSubscription {
-		user.UserSettings.MarketingEmailSubscription = true
+		user.UserSettings.EmailSubscriptions.Marketing = true
 	}
 
 	// Validate user fields.
@@ -203,6 +206,12 @@ func UserSignIn(c *fiber.Ctx) error {
 		HTTPOnly: true,
 	})
 
+	// Clear no needed fields from JSON output.
+	foundedUser.CreatedAt = nil
+	foundedUser.UpdatedAt = nil
+	foundedUser.PasswordHash = ""
+	foundedUser.UserRole = 0
+
 	// Return status 200 OK.
 	return c.JSON(fiber.Map{
 		"status": fiber.StatusOK,
@@ -210,6 +219,7 @@ func UserSignIn(c *fiber.Ctx) error {
 			"expire": time.Now().Add(time.Minute * time.Duration(minutesCount)).Unix(),
 			"token":  tokens.Access,
 		},
+		"user": foundedUser,
 	})
 }
 
