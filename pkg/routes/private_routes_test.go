@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestPublicRoutes(t *testing.T) {
+func TestPrivateRoutes(t *testing.T) {
 	// Load .env.test file from the root folder
 	if err := godotenv.Load("../../.env.test"); err != nil {
 		panic(err)
@@ -23,10 +23,10 @@ func TestPublicRoutes(t *testing.T) {
 		expectedCode  int
 	}{
 		{
-			description:   "get project by not found alias",
-			route:         "/v1/project/123456",
+			description:   "update password without JWT",
+			route:         "/v1/account/settings/password",
 			expectedError: false,
-			expectedCode:  404,
+			expectedCode:  400,
 		},
 	}
 
@@ -34,12 +34,12 @@ func TestPublicRoutes(t *testing.T) {
 	app := fiber.New()
 
 	// Define routes.
-	PublicRoutes(app)
+	PrivateRoutes(app)
 
 	// Iterate through test single test cases
 	for _, test := range tests {
 		// Create a new http request with the route from the test case.
-		req := httptest.NewRequest("GET", test.route, nil)
+		req := httptest.NewRequest("PATCH", test.route, nil)
 		req.Header.Set("Content-Type", "application/json")
 
 		// Perform the request plain with the app.
