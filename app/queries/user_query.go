@@ -3,6 +3,7 @@ package queries
 import (
 	"Komentory/auth/app/models"
 	"database/sql"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
@@ -107,12 +108,12 @@ func (q *UserQueries) UpdateUserAttrs(id uuid.UUID, u *models.UserAttrs) error {
 	// Define query string.
 	query := `
 	UPDATE users 
-	SET user_attrs = $2::jsonb 
+	SET updated_at = $2::timestamp, user_attrs = $3::jsonb 
 	WHERE id = $1::uuid
 	`
 
 	// Send query to database.
-	_, err := q.Exec(query, id, u)
+	_, err := q.Exec(query, id, time.Now(), u)
 	if err != nil {
 		// Return only error.
 		return err
@@ -127,12 +128,12 @@ func (q *UserQueries) UpdateUserSettings(id uuid.UUID, u *models.UserSettings) e
 	// Define query string.
 	query := `
 	UPDATE users 
-	SET user_settings = $2::jsonb 
+	SET updated_at = $2::timestamp, user_settings = $3::jsonb 
 	WHERE id = $1::uuid
 	`
 
 	// Send query to database.
-	_, err := q.Exec(query, id, u)
+	_, err := q.Exec(query, id, time.Now(), u)
 	if err != nil {
 		// Return only error.
 		return err
@@ -147,12 +148,12 @@ func (q *UserQueries) UpdateUserPassword(id uuid.UUID, password_hash string) err
 	// Define query string.
 	query := `
 	UPDATE users 
-	SET password_hash = $2::varchar 
+	SET updated_at = $2::timestamp, password_hash = $3::varchar 
 	WHERE id = $1::uuid
 	`
 
 	// Send query to database.
-	_, err := q.Exec(query, id, password_hash)
+	_, err := q.Exec(query, id, time.Now(), password_hash)
 	if err != nil {
 		// Return only error.
 		return err
@@ -167,12 +168,12 @@ func (q *UserQueries) UpdateUserStatus(id uuid.UUID) error {
 	// Define query string.
 	query := `
 	UPDATE users 
-	SET user_status = 1 
+	SET updated_at = $2::timestamp, user_status = 1 
 	WHERE id = $1::uuid
 	`
 
 	// Send query to database.
-	_, err := q.Exec(query, id)
+	_, err := q.Exec(query, id, time.Now())
 	if err != nil {
 		// Return only error.
 		return err

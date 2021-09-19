@@ -265,7 +265,7 @@ func UserLogout(c *fiber.Ctx) error {
 func UpdateUserAttrs(c *fiber.Ctx) error {
 	// Set needed credentials.
 	credentials := []string{
-		utilities.GenerateCredential("users", "update", true),
+		utilities.GenerateCredential("user_attrs", "update", true),
 	}
 
 	// Validate JWT token.
@@ -288,14 +288,8 @@ func UpdateUserAttrs(c *fiber.Ctx) error {
 		return utilities.CheckForErrorWithStatusCode(c, err, 500, "database", err.Error())
 	}
 
-	// Get user by email.
-	foundedUser, status, err := db.GetUserByID(claims.UserID)
-	if err != nil {
-		return utilities.CheckForErrorWithStatusCode(c, err, status, "user", err.Error())
-	}
-
 	// Update user attributes.
-	err = db.UpdateUserAttrs(foundedUser.ID, userAttrs)
+	err = db.UpdateUserAttrs(claims.UserID, userAttrs)
 	if err != nil {
 		return utilities.CheckForErrorWithStatusCode(c, err, 400, "user attrs", err.Error())
 	}
@@ -308,7 +302,7 @@ func UpdateUserAttrs(c *fiber.Ctx) error {
 func UpdateUserSettings(c *fiber.Ctx) error {
 	// Set needed credentials.
 	credentials := []string{
-		utilities.GenerateCredential("users", "update", true),
+		utilities.GenerateCredential("user_settings", "update", true),
 	}
 
 	// Validate JWT token.
@@ -331,14 +325,8 @@ func UpdateUserSettings(c *fiber.Ctx) error {
 		return utilities.CheckForErrorWithStatusCode(c, err, 500, "database", err.Error())
 	}
 
-	// Get user by email.
-	foundedUser, status, err := db.GetUserByID(claims.UserID)
-	if err != nil {
-		return utilities.CheckForErrorWithStatusCode(c, err, status, "user", err.Error())
-	}
-
 	// Update user attributes.
-	err = db.UpdateUserSettings(foundedUser.ID, userSettings)
+	err = db.UpdateUserSettings(claims.UserID, userSettings)
 	if err != nil {
 		return utilities.CheckForErrorWithStatusCode(c, err, 400, "user settings", err.Error())
 	}
@@ -351,7 +339,7 @@ func UpdateUserSettings(c *fiber.Ctx) error {
 func UpdateUserPassword(c *fiber.Ctx) error {
 	// Set needed credentials.
 	credentials := []string{
-		utilities.GenerateCredential("users", "update", true),
+		utilities.GenerateCredential("user_password", "update", true),
 	}
 
 	// Validate JWT token.
@@ -384,11 +372,8 @@ func UpdateUserPassword(c *fiber.Ctx) error {
 		return utilities.CheckForErrorWithStatusCode(c, err, 500, "database", err.Error())
 	}
 
-	// Set user ID from JWT data of current user.
-	userID := claims.UserID
-
 	// Get user by given email.
-	foundedUser, status, err := db.GetUserByID(userID)
+	foundedUser, status, err := db.GetUserByID(claims.UserID)
 	if err != nil {
 		return utilities.CheckForErrorWithStatusCode(c, err, status, "user", err.Error())
 	}
