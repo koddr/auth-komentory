@@ -16,21 +16,21 @@ import (
 
 // CreateNewResetCode method to create a new request to reset user password by given email.
 func CreateNewResetCode(c *fiber.Ctx) error {
-	// Create a new user auth struct.
-	forgotPassword := &models.ForgotPassword{}
+	// Create a new reset code struct.
+	newResetCode := &models.NewResetCode{}
 
 	// Checking received data from JSON body.
-	if err := c.BodyParser(forgotPassword); err != nil {
-		return utilities.CheckForError(c, err, 400, "forgot password", err.Error())
+	if err := c.BodyParser(newResetCode); err != nil {
+		return utilities.CheckForError(c, err, 400, "reset code", err.Error())
 	}
 
 	// Create a new validator for a User model.
 	validate := utilities.NewValidator()
 
 	// Validate sign up fields.
-	if err := validate.Struct(forgotPassword); err != nil {
+	if err := validate.Struct(newResetCode); err != nil {
 		return utilities.CheckForError(
-			c, err, 400, "forgot password", fmt.Sprintf("validation error, %v", err),
+			c, err, 400, "reset code", fmt.Sprintf("validation error, %v", err),
 		)
 	}
 
@@ -41,7 +41,7 @@ func CreateNewResetCode(c *fiber.Ctx) error {
 	}
 
 	// Get user by email.
-	foundedUser, status, err := db.GetUserByEmail(forgotPassword.Email)
+	foundedUser, status, err := db.GetUserByEmail(newResetCode.Email)
 	if err != nil {
 		return utilities.CheckForErrorWithStatusCode(c, err, status, "user", err.Error())
 	}
@@ -82,17 +82,17 @@ func CreateNewResetCode(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusCreated)
 }
 
-// ResetPassword method for reset password by given code.
-func ResetPassword(c *fiber.Ctx) error {
+// ApplyResetCode method for reset password by given code.
+func ApplyResetCode(c *fiber.Ctx) error {
 	// Get now time.
 	now := time.Now().Unix()
 
 	// Create a new reset password code struct.
-	resetPassword := &models.ResetPassword{}
+	applyResetCode := &models.ApplyResetCode{}
 
 	// Checking received data from JSON body.
-	if err := c.BodyParser(resetPassword); err != nil {
-		return utilities.CheckForError(c, err, 400, "reset password code", err.Error())
+	if err := c.BodyParser(applyResetCode); err != nil {
+		return utilities.CheckForError(c, err, 400, "reset code", err.Error())
 	}
 
 	// Create database connection.
@@ -102,9 +102,9 @@ func ResetPassword(c *fiber.Ctx) error {
 	}
 
 	// Get code by given string.
-	foundedCode, status, err := db.GetResetCode(resetPassword.Code)
+	foundedCode, status, err := db.GetResetCode(applyResetCode.Code)
 	if err != nil {
-		return utilities.CheckForErrorWithStatusCode(c, err, status, "reset password code", err.Error())
+		return utilities.CheckForErrorWithStatusCode(c, err, status, "reset code", err.Error())
 	}
 
 	// Checking, if now time greather than activation code expiration time.
@@ -130,8 +130,8 @@ func ResetPassword(c *fiber.Ctx) error {
 		}
 
 		// Delete activation code.
-		if err := db.DeleteResetCode(resetPassword.Code); err != nil {
-			return utilities.CheckForErrorWithStatusCode(c, err, 400, "reset password code", err.Error())
+		if err := db.DeleteResetCode(applyResetCode.Code); err != nil {
+			return utilities.CheckForErrorWithStatusCode(c, err, 400, "reset code", err.Error())
 		}
 
 		// Generate a new pair of access and refresh tokens.
@@ -194,15 +194,16 @@ func ResetPassword(c *fiber.Ctx) error {
 		// Return status 200 OK.
 		// User is authenticated automatically.
 		return c.JSON(fiber.Map{
-			"status": fiber.StatusOK,
+			"status":       fiber.StatusOK,
+			"user":         foundedUser,
+			"new_password": randomString, // for "old_password" field on frontend (manual re-creation)
 			"jwt": fiber.Map{
 				"expire": time.Now().Add(time.Minute * time.Duration(minutesCount)).Unix(),
 				"token":  tokens.Access,
 			},
-			"user": foundedUser,
 		})
 	} else {
 		// Return status 403 and forbidden error message.
-		return utilities.ThrowJSONErrorWithStatusCode(c, 403, "reset password code", "was expired")
+		return utilities.ThrowJSONErrorWithStatusCode(c, 403, "reset code", "was expired")
 	}
 }

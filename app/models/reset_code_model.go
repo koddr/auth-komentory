@@ -9,12 +9,12 @@ type ResetCode struct {
 	Email    string    `json:"email" validate:"required,email,lte=255"`
 }
 
-// ResetPassword struct to describe forgot password object.
-type ForgotPassword struct {
+// NewResetCode struct to describe creation of a reset code for the given email.
+type NewResetCode struct {
 	Email string `json:"email" validate:"required,email,lte=255"`
 }
 
-// ResetPassword struct to describe reset password object.
-type ResetPassword struct {
+// ApplyResetCode struct to describe applying of a given reset code.
+type ApplyResetCode struct {
 	Code string `json:"code" validate:"required,lte=14"`
 }

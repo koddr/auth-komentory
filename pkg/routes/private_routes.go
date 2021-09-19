@@ -13,6 +13,7 @@ func PrivateRoutes(a *fiber.App) {
 	route := a.Group("/v1")
 
 	// Routes for PATCH method:
-	route.Patch("/account/settings/password", middleware.JWTProtected(), controllers.UpdateUserPassword) // update user password
-	route.Patch("/account/settings/attrs", middleware.JWTProtected(), controllers.UpdateUserAttrs)       // update user attributes
+	route.Patch("/user/update/attrs", middleware.JWTProtected(), controllers.UpdateUserAttrs)       // update user attributes
+	route.Patch("/user/update/settings", middleware.JWTProtected(), controllers.UpdateUserSettings) // update user settings
+	route.Patch("/user/update/password", middleware.JWTProtected(), controllers.UpdateUserPassword) // update user password
 }

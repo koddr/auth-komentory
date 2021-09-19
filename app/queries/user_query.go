@@ -72,8 +72,8 @@ func (q *UserQueries) GetUserByEmail(email string) (models.User, int, error) {
 	}
 }
 
-// CreateUser query for creating a new user by given email and password hash.
-func (q *UserQueries) CreateUser(u *models.User) error {
+// CreateNewUser query for creating a new user by given email and password hash.
+func (q *UserQueries) CreateNewUser(u *models.User) error {
 	// Define query string.
 	query := `
 	INSERT INTO users 
@@ -102,17 +102,37 @@ func (q *UserQueries) CreateUser(u *models.User) error {
 	return nil
 }
 
-// UpdateUserStatus query for updating user status by given user ID.
-func (q *UserQueries) UpdateUserStatus(id uuid.UUID) error {
+// UpdateUserAttrs query for updating user attrs by given user ID.
+func (q *UserQueries) UpdateUserAttrs(id uuid.UUID, u *models.UserAttrs) error {
 	// Define query string.
 	query := `
 	UPDATE users 
-	SET user_status = 1 
+	SET user_attrs = $2::jsonb 
 	WHERE id = $1::uuid
 	`
 
 	// Send query to database.
-	_, err := q.Exec(query, id)
+	_, err := q.Exec(query, id, u)
+	if err != nil {
+		// Return only error.
+		return err
+	}
+
+	// This query returns nothing.
+	return nil
+}
+
+// UpdateUserSettings query for updating user settings by given user ID.
+func (q *UserQueries) UpdateUserSettings(id uuid.UUID, u *models.UserSettings) error {
+	// Define query string.
+	query := `
+	UPDATE users 
+	SET user_settings = $2::jsonb 
+	WHERE id = $1::uuid
+	`
+
+	// Send query to database.
+	_, err := q.Exec(query, id, u)
 	if err != nil {
 		// Return only error.
 		return err
@@ -142,17 +162,17 @@ func (q *UserQueries) UpdateUserPassword(id uuid.UUID, password_hash string) err
 	return nil
 }
 
-// UpdateUserAttrs query for updating user attrs by given user ID.
-func (q *UserQueries) UpdateUserAttrs(id uuid.UUID, u *models.UserAttrs) error {
+// UpdateUserStatus query for updating user status by given user ID.
+func (q *UserQueries) UpdateUserStatus(id uuid.UUID) error {
 	// Define query string.
 	query := `
 	UPDATE users 
-	SET user_attrs = $2::jsonb 
+	SET user_status = 1 
 	WHERE id = $1::uuid
 	`
 
 	// Send query to database.
-	_, err := q.Exec(query, id, u)
+	_, err := q.Exec(query, id)
 	if err != nil {
 		// Return only error.
 		return err

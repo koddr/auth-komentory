@@ -13,7 +13,7 @@ type ActivationCode struct {
 	UserID   uuid.UUID `db:"user_id" json:"user_id" validate:"required,uuid"`
 }
 
-// ActivateAccount struct to describe account activation object.
-type ActivateAccount struct {
+// ApplyActivationCode struct to describe applying activation code.
+type ApplyActivationCode struct {
 	Code string `json:"code" validate:"required,lte=14"`
 }

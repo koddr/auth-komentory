@@ -16,10 +16,10 @@ func ActivateAccount(c *fiber.Ctx) error {
 	now := time.Now().Unix()
 
 	// Create a new activation code struct.
-	activateAccount := &models.ActivateAccount{}
+	applyActivationCode := &models.ApplyActivationCode{}
 
 	// Checking received data from JSON body.
-	if err := c.BodyParser(activateAccount); err != nil {
+	if err := c.BodyParser(applyActivationCode); err != nil {
 		return utilities.CheckForError(c, err, 400, "activation code", err.Error())
 	}
 
@@ -30,7 +30,7 @@ func ActivateAccount(c *fiber.Ctx) error {
 	}
 
 	// Get code by given string.
-	foundedCode, status, err := db.GetActivationCode(activateAccount.Code)
+	foundedCode, status, err := db.GetActivationCode(applyActivationCode.Code)
 	if err != nil {
 		return utilities.CheckForErrorWithStatusCode(c, err, status, "activation code", err.Error())
 	}
@@ -49,7 +49,7 @@ func ActivateAccount(c *fiber.Ctx) error {
 		}
 
 		// Delete activation code.
-		if err := db.DeleteActivationCode(activateAccount.Code); err != nil {
+		if err := db.DeleteActivationCode(applyActivationCode.Code); err != nil {
 			return utilities.CheckForErrorWithStatusCode(c, err, 400, "activation code", err.Error())
 		}
 

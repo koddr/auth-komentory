@@ -24,7 +24,7 @@ func TestPrivateRoutes(t *testing.T) {
 	}{
 		{
 			description:   "update password without JWT",
-			route:         "/v1/account/settings/password",
+			route:         "/v1/user/update/password",
 			expectedError: false,
 			expectedCode:  400,
 		},

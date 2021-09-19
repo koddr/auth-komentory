@@ -45,13 +45,35 @@ type EmailSubscriptions struct {
 }
 
 // ---
-// Methods to update user attributes & settings.
+// Structures to create a new user.
+// ---
+
+// CreateNewUser struct to describe creation of a new user.
+type CreateNewUser struct {
+	Email        string       `json:"email" validate:"required,email,lte=255"`
+	Password     string       `json:"password" validate:"required,lte=255"`
+	UserAttrs    UserAttrs    `json:"user_attrs" validate:"required,dive"`
+	UserSettings UserSettings `json:"user_settings" validate:"required,dive"`
+}
+
+// ---
+// Structures to update user attributes, settings and password.
 // ---
 
 // UpdateUserPassword struct to describe updating user password.
 type UpdateUserPassword struct {
 	OldPassword string `json:"old_password" validate:"required"`
 	NewPassword string `json:"new_password" validate:"required"`
+}
+
+// ---
+// Structures to auth user.
+// ---
+
+// UserLogin struct to describe user login.
+type UserLogin struct {
+	Email    string `json:"email" validate:"required,email,lte=255"`
+	Password string `json:"password" validate:"required,lte=255"`
 }
 
 // ---
