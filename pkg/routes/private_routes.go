@@ -10,10 +10,10 @@ import (
 // PrivateRoutes func for describe group of private routes.
 func PrivateRoutes(a *fiber.App) {
 	// Create routes group.
-	route := a.Group("/v1")
+	route := a.Group("/v1", middleware.JWTProtected())
 
 	// Routes for PATCH method:
-	route.Patch("/user/update/attrs", middleware.JWTProtected(), controllers.UpdateUserAttrs)       // update user attributes
-	route.Patch("/user/update/settings", middleware.JWTProtected(), controllers.UpdateUserSettings) // update user settings
-	route.Patch("/user/update/password", middleware.JWTProtected(), controllers.UpdateUserPassword) // update user password
+	route.Patch("/user/update/attrs", controllers.UpdateUserAttrs)       // update user attributes
+	route.Patch("/user/update/settings", controllers.UpdateUserSettings) // update user settings
+	route.Patch("/user/update/password", controllers.UpdateUserPassword) // update user password
 }
