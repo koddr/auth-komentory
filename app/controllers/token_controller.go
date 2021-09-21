@@ -20,7 +20,7 @@ func RenewTokens(c *fiber.Ctx) error {
 	// If no refresh token in request.
 	if oldRefreshToken == "" {
 		// Return status 401 and unauthorized error message.
-		return utilities.ThrowJSONError(c, 401, "token", "refresh token is missing")
+		return utilities.ThrowJSONError(c, 401, "refresh token", "token is missing")
 	}
 
 	// Get now time.
@@ -104,13 +104,14 @@ func RenewTokens(c *fiber.Ctx) error {
 			HTTPOnly: true,
 		})
 
-		// Return status 200 OK and new access token with expiration time.
+		// Return status 200 OK and new access token with expiration time and user data.
 		return c.JSON(fiber.Map{
 			"status": fiber.StatusOK,
 			"jwt": fiber.Map{
 				"expire": time.Now().Add(time.Minute * time.Duration(minutesCount)).Unix(),
 				"token":  tokens.Access,
 			},
+			"user": foundedUser,
 		})
 	} else {
 		// Return status 401 and unauthorized error message.
