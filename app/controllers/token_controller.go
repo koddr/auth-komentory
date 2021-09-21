@@ -104,6 +104,12 @@ func RenewTokens(c *fiber.Ctx) error {
 			HTTPOnly: true,
 		})
 
+		// Clear no needed fields from JSON output.
+		foundedUser.CreatedAt = nil
+		foundedUser.UpdatedAt = nil
+		foundedUser.PasswordHash = ""
+		foundedUser.UserRole = 0
+
 		// Return status 200 OK and new access token with expiration time and user data.
 		return c.JSON(fiber.Map{
 			"status": fiber.StatusOK,
