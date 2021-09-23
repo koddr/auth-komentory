@@ -53,7 +53,7 @@ func CreateNewResetCode(c *fiber.Ctx) error {
 	}
 
 	// Generate a new reset code with nanoID.
-	randomResetCode, err := utilities.GenerateNewNanoID(os.Getenv("RESET_CODES_CHARS_STRING"), 14)
+	randomResetCode, err := utilities.GenerateNewNanoID(utilities.LowerCaseWithoutDashesChars, 14)
 	if err != nil {
 		return utilities.CheckForError(c, err, 500, "nanoid", err.Error())
 	}
@@ -116,7 +116,7 @@ func ApplyResetCode(c *fiber.Ctx) error {
 		}
 
 		// Generate a new random string for the password with nanoID.
-		randomString, err := utilities.GenerateNewNanoID(os.Getenv("RESET_CODES_CHARS_STRING"), 14)
+		randomString, err := utilities.GenerateNewNanoID("", 14)
 		if err != nil {
 			return utilities.CheckForError(c, err, 500, "nanoid", err.Error())
 		}

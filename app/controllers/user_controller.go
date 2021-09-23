@@ -54,7 +54,7 @@ func CreateNewUser(c *fiber.Ctx) error {
 	user := &models.User{}
 
 	// Generate a new username with nanoID.
-	randomUsername, err := utilities.GenerateNewNanoID("", 18)
+	randomUsername, err := utilities.GenerateNewNanoID(utilities.LowerCaseChars, 18)
 	if err != nil {
 		return utilities.CheckForError(c, err, 500, "nanoid", err.Error())
 	}
@@ -94,7 +94,7 @@ func CreateNewUser(c *fiber.Ctx) error {
 	}
 
 	// Generate a new activation code with nanoID.
-	randomActivationCode, err := utilities.GenerateNewNanoID(os.Getenv("RESET_CODES_CHARS_STRING"), 14)
+	randomActivationCode, err := utilities.GenerateNewNanoID(utilities.LowerCaseWithoutDashesChars, 14)
 	if err != nil {
 		return utilities.CheckForError(c, err, 500, "nanoid", err.Error())
 	}
