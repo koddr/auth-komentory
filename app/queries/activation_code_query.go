@@ -20,9 +20,12 @@ func (q *ActivationCodeQueries) GetActivationCode(code string) (models.Activatio
 
 	// Define query string.
 	query := `
-	SELECT * 
-	FROM activation_codes 
-	WHERE code = $1::varchar
+	SELECT *
+	FROM
+		activation_codes
+	WHERE
+		code = $1::varchar
+	LIMIT 1
 	`
 
 	// Send query to database.

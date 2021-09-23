@@ -20,9 +20,12 @@ func (q *ResetCodeQueries) GetResetCode(code string) (models.ResetCode, int, err
 
 	// Define query string.
 	query := `
-	SELECT * 
-	FROM reset_codes 
-	WHERE code = $1::varchar
+	SELECT *
+	FROM
+		reset_codes
+	WHERE
+		code = $1::varchar
+	LIMIT 1
 	`
 
 	// Send query to database.

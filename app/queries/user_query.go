@@ -22,9 +22,12 @@ func (q *UserQueries) GetUserByID(id uuid.UUID) (models.User, int, error) {
 
 	// Define query string.
 	query := `
-	SELECT * 
-	FROM users 
-	WHERE id = $1::uuid
+	SELECT *
+	FROM
+		users
+	WHERE
+		id = $1::uuid
+	LIMIT 1
 	`
 
 	// Send query to database.
@@ -51,9 +54,12 @@ func (q *UserQueries) GetUserByEmail(email string) (models.User, int, error) {
 
 	// Define query string.
 	query := `
-	SELECT * 
-	FROM users 
-	WHERE email = $1::varchar
+	SELECT *
+	FROM
+		users
+	WHERE
+		email = $1::varchar
+	LIMIT 1
 	`
 
 	// Send query to database.
@@ -77,7 +83,7 @@ func (q *UserQueries) GetUserByEmail(email string) (models.User, int, error) {
 func (q *UserQueries) CreateNewUser(u *models.User) error {
 	// Define query string.
 	query := `
-	INSERT INTO users 
+	INSERT INTO users
 	VALUES (
 		$1::uuid, $2::timestamp, $3::timestamp, 
 		$4::varchar, $5::varchar, $6::varchar, 
@@ -107,9 +113,13 @@ func (q *UserQueries) CreateNewUser(u *models.User) error {
 func (q *UserQueries) UpdateUserAttrs(id uuid.UUID, u *models.UserAttrs) error {
 	// Define query string.
 	query := `
-	UPDATE users 
-	SET updated_at = $2::timestamp, user_attrs = $3::jsonb 
-	WHERE id = $1::uuid
+	UPDATE
+		users
+	SET
+		updated_at = $2::timestamp,
+		user_attrs = $3::jsonb
+	WHERE
+		id = $1::uuid
 	`
 
 	// Send query to database.
@@ -127,9 +137,13 @@ func (q *UserQueries) UpdateUserAttrs(id uuid.UUID, u *models.UserAttrs) error {
 func (q *UserQueries) UpdateUserSettings(id uuid.UUID, u *models.UserSettings) error {
 	// Define query string.
 	query := `
-	UPDATE users 
-	SET updated_at = $2::timestamp, user_settings = $3::jsonb 
-	WHERE id = $1::uuid
+	UPDATE
+		users
+	SET
+		updated_at = $2::timestamp,
+		user_settings = $3::jsonb
+	WHERE
+		id = $1::uuid
 	`
 
 	// Send query to database.
@@ -147,9 +161,13 @@ func (q *UserQueries) UpdateUserSettings(id uuid.UUID, u *models.UserSettings) e
 func (q *UserQueries) UpdateUserPassword(id uuid.UUID, password_hash string) error {
 	// Define query string.
 	query := `
-	UPDATE users 
-	SET updated_at = $2::timestamp, password_hash = $3::varchar 
-	WHERE id = $1::uuid
+	UPDATE
+		users
+	SET
+		updated_at = $2::timestamp,
+		password_hash = $3::varchar
+	WHERE
+		id = $1::uuid
 	`
 
 	// Send query to database.
@@ -167,9 +185,13 @@ func (q *UserQueries) UpdateUserPassword(id uuid.UUID, password_hash string) err
 func (q *UserQueries) UpdateUserStatus(id uuid.UUID) error {
 	// Define query string.
 	query := `
-	UPDATE users 
-	SET updated_at = $2::timestamp, user_status = 1 
-	WHERE id = $1::uuid
+	UPDATE
+		users
+	SET
+		updated_at = $2::timestamp,
+		user_status = 1
+	WHERE
+		id = $1::uuid
 	`
 
 	// Send query to database.
