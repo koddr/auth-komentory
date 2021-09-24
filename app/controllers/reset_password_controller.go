@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"os"
 	"strconv"
 	"time"
@@ -29,9 +28,7 @@ func CreateNewResetCode(c *fiber.Ctx) error {
 
 	// Validate sign up fields.
 	if err := validate.Struct(newResetCode); err != nil {
-		return utilities.CheckForError(
-			c, err, 400, "reset code", fmt.Sprintf("validation error, %v", err),
-		)
+		return utilities.CheckForValidationError(c, err, 400, "reset code")
 	}
 
 	// Create database connection.
@@ -68,9 +65,7 @@ func CreateNewResetCode(c *fiber.Ctx) error {
 
 	// Validate reset code fields.
 	if err := validate.Struct(resetCode); err != nil {
-		return utilities.CheckForError(
-			c, err, 400, "reset code", fmt.Sprintf("validation error, %v", err),
-		)
+		return utilities.CheckForValidationError(c, err, 400, "reset code")
 	}
 
 	// Create a new reset code with validated data.

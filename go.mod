@@ -3,7 +3,7 @@ module Komentory/auth
 go 1.17
 
 require (
-	github.com/Komentory/utilities v0.6.1
+	github.com/Komentory/utilities v0.7.2
 	github.com/gofiber/fiber/v2 v2.19.0
 	github.com/gofiber/helmet/v2 v2.2.2
 	github.com/gofiber/jwt/v2 v2.2.7

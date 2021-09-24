@@ -4,7 +4,6 @@ import (
 	"Komentory/auth/app/models"
 	"Komentory/auth/pkg/helpers"
 	"Komentory/auth/platform/database"
-	"fmt"
 	"os"
 	"strconv"
 	"time"
@@ -29,7 +28,7 @@ func CreateNewUser(c *fiber.Ctx) error {
 
 	// Validate fields.
 	if err := validate.Struct(newUser); err != nil {
-		return utilities.CheckForError(c, err, 400, "create user", fmt.Sprintf("validation error, %v", err))
+		return utilities.CheckForValidationError(c, err, 400, "create user")
 	}
 
 	// Create database connection.
@@ -85,7 +84,7 @@ func CreateNewUser(c *fiber.Ctx) error {
 
 	// Validate user fields.
 	if err := validate.Struct(user); err != nil {
-		return utilities.CheckForError(c, err, 400, "user", fmt.Sprintf("validation error, %v", err))
+		return utilities.CheckForValidationError(c, err, 400, "user")
 	}
 
 	// Create a new user with validated data.
@@ -109,9 +108,7 @@ func CreateNewUser(c *fiber.Ctx) error {
 
 	// Validate activation code fields.
 	if err := validate.Struct(activationCode); err != nil {
-		return utilities.CheckForError(
-			c, err, 400, "activation code", fmt.Sprintf("validation error, %v", err),
-		)
+		return utilities.CheckForValidationError(c, err, 400, "activation code")
 	}
 
 	// Create a new activation code with validated data.
@@ -361,9 +358,7 @@ func UpdateUserPassword(c *fiber.Ctx) error {
 
 	// Validate sign up fields.
 	if err := validate.Struct(updatePassword); err != nil {
-		return utilities.CheckForError(
-			c, err, 400, "task", fmt.Sprintf("validation error, %v", utilities.ValidatorErrors(err)),
-		)
+		return utilities.CheckForValidationError(c, err, 400, "task")
 	}
 
 	// Create database connection.
