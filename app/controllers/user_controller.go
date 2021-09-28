@@ -41,12 +41,12 @@ func CreateNewUser(c *fiber.Ctx) error {
 	// If status is 404, user is not signed up.
 	foundedUser, status, err := db.GetUserByEmail(newUser.Email)
 	if err != nil && status != 404 {
-		return utilities.CheckForErrorWithStatusCode(c, err, status, "user", err.Error())
+		return utilities.CheckForError(c, err, status, "user", err.Error())
 	}
 
 	// If user with given email is already sign up, return error.
 	if foundedUser.Email == newUser.Email {
-		return utilities.ThrowJSONErrorWithStatusCode(c, 400, "user", "already signed up")
+		return utilities.ThrowJSONError(c, 400, "user", "already signed up")
 	}
 
 	// Create a new user struct.
@@ -55,7 +55,7 @@ func CreateNewUser(c *fiber.Ctx) error {
 	// Generate a new username with nanoID.
 	randomUsername, err := utilities.GenerateNewNanoID(utilities.LowerCaseChars, 18)
 	if err != nil {
-		return utilities.CheckForError(c, err, 500, "nanoid", err.Error())
+		return utilities.CheckForErrorWithStatusCode(c, err, 500, "nanoid", err.Error())
 	}
 
 	// Create a new variable for timestamp, because time fields in User model are pointers.
@@ -89,13 +89,13 @@ func CreateNewUser(c *fiber.Ctx) error {
 
 	// Create a new user with validated data.
 	if err := db.CreateNewUser(user); err != nil {
-		return utilities.CheckForErrorWithStatusCode(c, err, 400, "user", err.Error())
+		return utilities.CheckForError(c, err, 400, "user", err.Error())
 	}
 
 	// Generate a new activation code with nanoID.
 	randomActivationCode, err := utilities.GenerateNewNanoID(utilities.LowerCaseWithoutDashesChars, 14)
 	if err != nil {
-		return utilities.CheckForError(c, err, 500, "nanoid", err.Error())
+		return utilities.CheckForErrorWithStatusCode(c, err, 500, "nanoid", err.Error())
 	}
 
 	// Create a new ResetCode struct for activation code.
@@ -142,13 +142,13 @@ func UserLogin(c *fiber.Ctx) error {
 	// Get user by given email.
 	foundedUser, status, err := db.GetUserByEmail(userLogin.Email)
 	if err != nil {
-		return utilities.CheckForErrorWithStatusCode(c, err, status, "user", err.Error())
+		return utilities.CheckForError(c, err, status, "user", err.Error())
 	}
 
 	// Compare given user password with stored in found user.
 	compareUserPassword := utilities.ComparePasswords(foundedUser.PasswordHash, userLogin.Password)
 	if !compareUserPassword {
-		return utilities.ThrowJSONErrorWithStatusCode(c, 403, "user login", "email or password")
+		return utilities.ThrowJSONError(c, 403, "user login", "email or password")
 	}
 
 	// Generate a new pair of access and refresh tokens.
@@ -183,13 +183,13 @@ func UserLogin(c *fiber.Ctx) error {
 	// Set expires minutes count for secret key from .env file.
 	minutesCount, err := strconv.Atoi(os.Getenv("JWT_SECRET_KEY_EXPIRE_MINUTES_COUNT"))
 	if err != nil {
-		return utilities.CheckForError(c, err, 500, "minutes count", err.Error())
+		return utilities.CheckForErrorWithStatusCode(c, err, 500, "minutes count", err.Error())
 	}
 
 	// Set expires hours count for refresh key from .env file.
 	hoursCount, err := strconv.Atoi(os.Getenv("JWT_REFRESH_KEY_EXPIRE_HOURS_COUNT"))
 	if err != nil {
-		return utilities.CheckForError(c, err, 500, "hours count", err.Error())
+		return utilities.CheckForErrorWithStatusCode(c, err, 500, "hours count", err.Error())
 	}
 
 	// Set HttpOnly cookie with refresh token.
@@ -268,7 +268,7 @@ func UpdateUserAttrs(c *fiber.Ctx) error {
 	// Validate JWT token.
 	claims, err := utilities.TokenValidateExpireTimeAndCredentials(c, credentials)
 	if err != nil {
-		return utilities.CheckForErrorWithStatusCode(c, err, 401, "update user attrs", err.Error())
+		return utilities.CheckForError(c, err, 401, "update user attrs", err.Error())
 	}
 
 	// Create a new user auth struct.
@@ -288,7 +288,7 @@ func UpdateUserAttrs(c *fiber.Ctx) error {
 	// Update user attributes.
 	err = db.UpdateUserAttrs(claims.UserID, userAttrs)
 	if err != nil {
-		return utilities.CheckForErrorWithStatusCode(c, err, 400, "user attrs", err.Error())
+		return utilities.CheckForError(c, err, 400, "user attrs", err.Error())
 	}
 
 	// Return status 204 no content.
@@ -305,7 +305,7 @@ func UpdateUserSettings(c *fiber.Ctx) error {
 	// Validate JWT token.
 	claims, err := utilities.TokenValidateExpireTimeAndCredentials(c, credentials)
 	if err != nil {
-		return utilities.CheckForErrorWithStatusCode(c, err, 401, "update user settings", err.Error())
+		return utilities.CheckForError(c, err, 401, "update user settings", err.Error())
 	}
 
 	// Create a new UserSettings struct.
@@ -325,7 +325,7 @@ func UpdateUserSettings(c *fiber.Ctx) error {
 	// Update user attributes.
 	err = db.UpdateUserSettings(claims.UserID, userSettings)
 	if err != nil {
-		return utilities.CheckForErrorWithStatusCode(c, err, 400, "user settings", err.Error())
+		return utilities.CheckForError(c, err, 400, "user settings", err.Error())
 	}
 
 	// Return status 204 no content.
@@ -342,7 +342,7 @@ func UpdateUserPassword(c *fiber.Ctx) error {
 	// Validate JWT token.
 	claims, err := utilities.TokenValidateExpireTimeAndCredentials(c, credentials)
 	if err != nil {
-		return utilities.CheckForErrorWithStatusCode(c, err, 401, "update user password", err.Error())
+		return utilities.CheckForError(c, err, 401, "update user password", err.Error())
 	}
 
 	// Create a new UpdateUserPassword struct.
@@ -370,13 +370,13 @@ func UpdateUserPassword(c *fiber.Ctx) error {
 	// Get user by given email.
 	foundedUser, status, err := db.GetUserByID(claims.UserID)
 	if err != nil {
-		return utilities.CheckForErrorWithStatusCode(c, err, status, "user", err.Error())
+		return utilities.CheckForError(c, err, status, "user", err.Error())
 	}
 
 	// Compare given user password with stored in found user.
 	matchUserPasswords := utilities.ComparePasswords(foundedUser.PasswordHash, updatePassword.OldPassword)
 	if !matchUserPasswords {
-		return utilities.ThrowJSONErrorWithStatusCode(c, 403, "user", "email or password")
+		return utilities.ThrowJSONError(c, 403, "user", "email or password")
 	}
 
 	// Set initialized default data for user:
@@ -384,7 +384,7 @@ func UpdateUserPassword(c *fiber.Ctx) error {
 
 	// Create a new user with validated data.
 	if err := db.UpdateUserPassword(foundedUser.ID, newPasswordHash); err != nil {
-		return utilities.CheckForErrorWithStatusCode(c, err, 400, "user", err.Error())
+		return utilities.CheckForError(c, err, 400, "user", err.Error())
 	}
 
 	// Return status 204 no content.

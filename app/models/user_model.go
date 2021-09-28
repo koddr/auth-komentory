@@ -9,6 +9,10 @@ import (
 	"github.com/google/uuid"
 )
 
+// ---
+// Structures to describing user model.
+// ---
+
 // User struct to describe User object.
 type User struct {
 	ID           uuid.UUID    `db:"id" json:"id" validate:"required,uuid"`
@@ -45,7 +49,7 @@ type EmailSubscriptions struct {
 }
 
 // ---
-// Structures to create a new user.
+// Structures to creating a new user.
 // ---
 
 // CreateNewUser struct to describe creation of a new user.
@@ -57,7 +61,7 @@ type CreateNewUser struct {
 }
 
 // ---
-// Structures to update user attributes, settings and password.
+// Structures to updating user attributes, settings and password.
 // ---
 
 // UpdateUserPassword struct to describe updating user password.
@@ -67,7 +71,7 @@ type UpdateUserPassword struct {
 }
 
 // ---
-// Structures to auth user.
+// Structures to authenticating user.
 // ---
 
 // UserLogin struct to describe user login.

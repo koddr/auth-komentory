@@ -85,13 +85,13 @@ func RenewTokens(c *fiber.Ctx) error {
 		// Set expires minutes count for secret key from .env file.
 		minutesCount, err := strconv.Atoi(os.Getenv("JWT_SECRET_KEY_EXPIRE_MINUTES_COUNT"))
 		if err != nil {
-			return utilities.CheckForError(c, err, 500, "minutes count", err.Error())
+			return utilities.CheckForErrorWithStatusCode(c, err, 500, "minutes count", err.Error())
 		}
 
 		// Set expires hours count for refresh key from .env file.
 		hoursCount, err := strconv.Atoi(os.Getenv("JWT_REFRESH_KEY_EXPIRE_HOURS_COUNT"))
 		if err != nil {
-			return utilities.CheckForError(c, err, 500, "hours count", err.Error())
+			return utilities.CheckForErrorWithStatusCode(c, err, 500, "hours count", err.Error())
 		}
 
 		// Set HttpOnly cookie with refresh token.

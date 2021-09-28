@@ -1,6 +1,8 @@
 package routes
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"net/http/httptest"
 	"testing"
 
@@ -19,14 +21,16 @@ func TestPrivateRoutes(t *testing.T) {
 	tests := []struct {
 		description   string
 		route         string // input route
+		tokenString   string
 		expectedError bool
 		expectedCode  int
 	}{
 		{
 			description:   "update password without JWT",
-			route:         "/v1/user/update/password",
+			route:         "/v1/user/update/attrs",
+			tokenString:   "",
 			expectedError: false,
-			expectedCode:  400,
+			expectedCode:  400, // "Missing or malformed JWT"
 		},
 	}
 
@@ -40,6 +44,7 @@ func TestPrivateRoutes(t *testing.T) {
 	for _, test := range tests {
 		// Create a new http request with the route from the test case.
 		req := httptest.NewRequest("PATCH", test.route, nil)
+		req.Header.Set("Authorization", test.tokenString)
 		req.Header.Set("Content-Type", "application/json")
 
 		// Perform the request plain with the app.
@@ -54,7 +59,19 @@ func TestPrivateRoutes(t *testing.T) {
 			continue
 		}
 
-		// Verify, if the status code is as expected.
-		assert.Equalf(t, test.expectedCode, resp.StatusCode, test.description)
+		// Parse the response body.
+		body, errReadAll := ioutil.ReadAll(resp.Body)
+		if errReadAll != nil {
+			return
+		}
+
+		// Set the response body (JSON) to simple map.
+		var result map[string]interface{}
+		if errUnmarshal := json.Unmarshal(body, &result); errUnmarshal != nil {
+			return
+		}
+
+		// Checking, if the JSON field "status" from the response body has the expected status code.
+		assert.Equalf(t, test.expectedCode, int(result["status"].(float64)), test.description)
 	}
 }

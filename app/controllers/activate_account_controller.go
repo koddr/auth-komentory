@@ -32,7 +32,7 @@ func ActivateAccount(c *fiber.Ctx) error {
 	// Get code by given string.
 	foundedCode, status, err := db.GetActivationCode(applyActivationCode.Code)
 	if err != nil {
-		return utilities.CheckForErrorWithStatusCode(c, err, status, "activation code", err.Error())
+		return utilities.CheckForError(c, err, status, "activation code", err.Error())
 	}
 
 	// Checking, if now time greather than activation code expiration time.
@@ -40,17 +40,17 @@ func ActivateAccount(c *fiber.Ctx) error {
 		// Get user by given ID.
 		foundedUser, status, err := db.GetUserByID(foundedCode.UserID)
 		if err != nil {
-			return utilities.CheckForErrorWithStatusCode(c, err, status, "user", err.Error())
+			return utilities.CheckForError(c, err, status, "user", err.Error())
 		}
 
 		// Update user status to 1 (active).
 		if err := db.UpdateUserStatus(foundedUser.ID); err != nil {
-			return utilities.CheckForErrorWithStatusCode(c, err, 400, "user", err.Error())
+			return utilities.CheckForError(c, err, 400, "user", err.Error())
 		}
 
 		// Delete activation code.
 		if err := db.DeleteActivationCode(applyActivationCode.Code); err != nil {
-			return utilities.CheckForErrorWithStatusCode(c, err, 400, "activation code", err.Error())
+			return utilities.CheckForError(c, err, 400, "activation code", err.Error())
 		}
 
 		// Return status 200 OK.
@@ -64,6 +64,6 @@ func ActivateAccount(c *fiber.Ctx) error {
 		})
 	} else {
 		// Return status 403 and forbidden error message.
-		return utilities.ThrowJSONErrorWithStatusCode(c, 403, "activation code", "was expired")
+		return utilities.ThrowJSONError(c, 403, "activation code", "was expired")
 	}
 }
