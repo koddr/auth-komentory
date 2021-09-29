@@ -2,6 +2,8 @@ package routes
 
 import (
 	"encoding/json"
+	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http/httptest"
 	"testing"
@@ -21,14 +23,18 @@ func TestPrivateRoutes(t *testing.T) {
 	tests := []struct {
 		description   string
 		route         string // input route
+		httpMethod    string
 		tokenString   string
+		body          io.Reader
 		expectedError bool
 		expectedCode  int
 	}{
 		{
-			description:   "update password without JWT",
+			description:   "fail: update password without JWT",
 			route:         "/v1/user/update/attrs",
+			httpMethod:    "PATCH",
 			tokenString:   "",
+			body:          nil,
 			expectedError: false,
 			expectedCode:  400, // "Missing or malformed JWT"
 		},
@@ -41,23 +47,14 @@ func TestPrivateRoutes(t *testing.T) {
 	PrivateRoutes(app)
 
 	// Iterate through test single test cases
-	for _, test := range tests {
+	for index, test := range tests {
 		// Create a new http request with the route from the test case.
-		req := httptest.NewRequest("PATCH", test.route, nil)
+		req := httptest.NewRequest(test.httpMethod, test.route, test.body)
 		req.Header.Set("Authorization", test.tokenString)
 		req.Header.Set("Content-Type", "application/json")
 
 		// Perform the request plain with the app.
 		resp, err := app.Test(req, -1) // the -1 disables request latency
-
-		// Verify, that no error occurred, that is not expected
-		assert.Equalf(t, test.expectedError, err != nil, test.description)
-
-		// As expected errors lead to broken responses,
-		// the next test case needs to be processed.
-		if test.expectedError {
-			continue
-		}
 
 		// Parse the response body.
 		body, errReadAll := ioutil.ReadAll(resp.Body)
@@ -71,7 +68,26 @@ func TestPrivateRoutes(t *testing.T) {
 			return
 		}
 
+		// Redefine index of the test case.
+		readableIndex := index + 1
+
+		// Define status & description from the response.
+		status := int(result["status"].(float64))
+		description := fmt.Sprintf(
+			"[%d] need to %s\nreal error output: %s",
+			readableIndex, test.description, result["msg"].(string),
+		)
+
+		// Verify, that no error occurred, that is not expected
+		assert.Equalf(t, test.expectedError, err != nil, test.description)
+
+		// As expected errors lead to broken responses,
+		// the next test case needs to be processed.
+		if test.expectedError {
+			continue
+		}
+
 		// Checking, if the JSON field "status" from the response body has the expected status code.
-		assert.Equalf(t, test.expectedCode, int(result["status"].(float64)), test.description)
+		assert.Equalf(t, test.expectedCode, status, description)
 	}
 }
