@@ -23,7 +23,7 @@ func CreateNewUser(c *fiber.Ctx) error {
 		return utilities.CheckForError(c, err, 400, "create user", err.Error())
 	}
 
-	// Create a new validator for a CreateNewUser struct.
+	// Create a new validator for the struct.
 	validate := utilities.NewValidator()
 
 	// Validate fields.
@@ -279,14 +279,28 @@ func UpdateUserAttrs(c *fiber.Ctx) error {
 		return utilities.CheckForError(c, err, 400, "user attrs", err.Error())
 	}
 
+	// Create a new validator for the struct.
+	validate := utilities.NewValidator()
+
+	// Validate fields.
+	if err := validate.Struct(userAttrs); err != nil {
+		return utilities.CheckForValidationError(c, err, 400, "update user attrs")
+	}
+
 	// Create database connection.
 	db, err := database.OpenDBConnection()
 	if err != nil {
 		return utilities.CheckForErrorWithStatusCode(c, err, 500, "database", err.Error())
 	}
 
+	// Get user by ID from JWT.
+	foundedUser, status, err := db.GetUserByID(claims.UserID)
+	if err != nil {
+		return utilities.CheckForError(c, err, status, "user", err.Error())
+	}
+
 	// Update user attributes.
-	err = db.UpdateUserAttrs(claims.UserID, userAttrs)
+	err = db.UpdateUserAttrs(foundedUser.ID, userAttrs)
 	if err != nil {
 		return utilities.CheckForError(c, err, 400, "user attrs", err.Error())
 	}

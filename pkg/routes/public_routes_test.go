@@ -21,8 +21,10 @@ func TestPublicRoutes(t *testing.T) {
 	}
 
 	// Define test bodies for JSON request.
-	bodyCodeEmpty := bytes.NewBuffer([]byte(`{"code": ""}`))
-	bodyCodeWrong := bytes.NewBuffer([]byte(`{"code": "123456"}`))
+	body := map[string]string{
+		"empty":     `{"code": ""}`,
+		"not-empty": `{"code": "123456"}`,
+	}
 
 	// Define a structure for specifying input and output data of a single test case.
 	tests := []struct {
@@ -35,7 +37,7 @@ func TestPublicRoutes(t *testing.T) {
 	}{
 		// Failed test cases:
 		{
-			description:   "fail: apply activation code with no request JSON body",
+			description:   "fail: apply activation code with no JSON body",
 			route:         "/v1/account/activate",
 			httpMethod:    "PATCH",
 			body:          nil,
@@ -43,44 +45,44 @@ func TestPublicRoutes(t *testing.T) {
 			expectedCode:  400,
 		},
 		{
-			description:   "fail: apply activation code with empty code string (not found) in request JSON body",
+			description:   "fail: apply activation code with empty code string in JSON body",
 			route:         "/v1/account/activate",
 			httpMethod:    "PATCH",
-			body:          bodyCodeEmpty,
+			body:          bytes.NewBuffer([]byte(body["empty"])),
 			expectedError: false,
 			expectedCode:  404,
 		},
 		{
-			description:   "fail: apply activation code with wrong code string in request JSON body",
+			description:   "fail: apply activation code with JSON body, but user not found in DB",
 			route:         "/v1/account/activate",
 			httpMethod:    "PATCH",
-			body:          bodyCodeWrong,
+			body:          bytes.NewBuffer([]byte(body["not-empty"])),
 			expectedError: false,
 			expectedCode:  404,
 		},
 		{
-			description:   "fail: apply reset code without request JSON body",
-			route:         "/v1/account/activate",
+			description:   "fail: apply reset code without JSON body",
+			route:         "/v1/password/reset",
 			httpMethod:    "PATCH",
 			body:          nil,
 			expectedError: false,
 			expectedCode:  400,
 		},
 		{
-			description:   "fail: apply reset code with empty code string (not found) in request JSON body",
+			description:   "fail: apply reset code with empty code string in JSON body",
 			route:         "/v1/password/reset",
 			httpMethod:    "PATCH",
-			body:          bodyCodeEmpty,
+			body:          bytes.NewBuffer([]byte(body["empty"])),
 			expectedError: false,
-			expectedCode:  400,
+			expectedCode:  404,
 		},
 		{
-			description:   "fail: apply reset code with wrong code string in request JSON body",
+			description:   "fail: apply reset code with JSON body, but code not found in DB",
 			route:         "/v1/password/reset",
 			httpMethod:    "PATCH",
-			body:          bodyCodeWrong,
+			body:          bytes.NewBuffer([]byte(body["not-empty"])),
 			expectedError: false,
-			expectedCode:  400,
+			expectedCode:  404,
 		},
 	}
 

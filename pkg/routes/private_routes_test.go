@@ -1,6 +1,8 @@
 package routes
 
 import (
+	"Komentory/auth/pkg/helpers"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -8,7 +10,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/Komentory/utilities"
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/assert"
 )
@@ -17,6 +21,13 @@ func TestPrivateRoutes(t *testing.T) {
 	// Load .env.test file from the root folder
 	if err := godotenv.Load("../../.env.test"); err != nil {
 		panic(err)
+	}
+
+	// Define test variables.
+	tokens, _ := helpers.GenerateNewTokens(uuid.New().String(), utilities.RoleNameUser)
+	body := map[string]string{
+		"empty":     `{}`,
+		"non-empty": `{"first_name": "Bob"}`,
 	}
 
 	// Define a structure for specifying input and output data of a single test case.
@@ -29,14 +40,42 @@ func TestPrivateRoutes(t *testing.T) {
 		expectedError bool
 		expectedCode  int
 	}{
+		// Failed test cases:
 		{
-			description:   "fail: update password without JWT",
+			description:   "fail: update user attrs without JWT",
 			route:         "/v1/user/update/attrs",
 			httpMethod:    "PATCH",
 			tokenString:   "",
 			body:          nil,
 			expectedError: false,
-			expectedCode:  400, // "Missing or malformed JWT"
+			expectedCode:  400, // Missing or malformed JWT
+		},
+		{
+			description:   "fail: update user attrs without JSON body",
+			route:         "/v1/user/update/attrs",
+			httpMethod:    "PATCH",
+			tokenString:   tokens.Access,
+			body:          nil,
+			expectedError: false,
+			expectedCode:  400, // unexpected end of JSON input
+		},
+		{
+			description:   "fail: update user attrs with empty JSON body",
+			route:         "/v1/user/update/attrs",
+			httpMethod:    "PATCH",
+			tokenString:   tokens.Access,
+			body:          bytes.NewBuffer([]byte(body["empty"])),
+			expectedError: false,
+			expectedCode:  400, // validation errors
+		},
+		{
+			description:   "fail: update user attrs with JSON body, but user not found in DB",
+			route:         "/v1/user/update/attrs",
+			httpMethod:    "PATCH",
+			tokenString:   tokens.Access,
+			body:          bytes.NewBuffer([]byte(body["non-empty"])),
+			expectedError: false,
+			expectedCode:  404, // sql: no rows in result set
 		},
 	}
 
@@ -50,7 +89,7 @@ func TestPrivateRoutes(t *testing.T) {
 	for index, test := range tests {
 		// Create a new http request with the route from the test case.
 		req := httptest.NewRequest(test.httpMethod, test.route, test.body)
-		req.Header.Set("Authorization", test.tokenString)
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", test.tokenString))
 		req.Header.Set("Content-Type", "application/json")
 
 		// Perform the request plain with the app.
