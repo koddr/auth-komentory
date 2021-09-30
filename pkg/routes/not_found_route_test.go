@@ -1,33 +1,21 @@
 package routes
 
 import (
-	"Komentory/auth/pkg/helpers"
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/Komentory/utilities"
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
 	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestPrivateRoutes(t *testing.T) {
+func TestNotFoundRoute(t *testing.T) {
 	// Load .env.test file from the root folder
 	if err := godotenv.Load("../../.env.test"); err != nil {
 		panic(err)
-	}
-
-	// Define test variables.
-	tokens, _ := helpers.GenerateNewTokens(uuid.New().String(), utilities.RoleNameUser)
-	body := map[string]string{
-		"empty":     `{}`,
-		"non-empty": `{"first_name": "Bob"}`,
 	}
 
 	// Define a structure for specifying input and output data of a single test case.
@@ -35,30 +23,23 @@ func TestPrivateRoutes(t *testing.T) {
 		description  string
 		httpMethod   string
 		route        string // input route
-		tokenString  string
-		body         io.Reader
 		expectedCode int
 	}{
 		// Failed test cases:
 		{
-			"fail: update user attrs without JWT",
-			"PATCH", "/v1/user/update/attrs", "", nil,
-			400, // Missing or malformed JWT
+			"fail: send POST request to not found route",
+			"POST", "/v1/not-found",
+			404, // endpoint is not found
 		},
 		{
-			"fail: update user attrs without JSON body",
-			"PATCH", "/v1/user/update/attrs", tokens.Access, nil,
-			400, // unexpected end of JSON input
+			"fail: send PATCH request to not found route",
+			"PATCH", "/v1/not-found",
+			404, // endpoint is not found
 		},
 		{
-			"fail: update user attrs with empty JSON body",
-			"PATCH", "/v1/user/update/attrs", tokens.Access, bytes.NewBuffer([]byte(body["empty"])),
-			400, // validation errors
-		},
-		{
-			"fail: update user attrs with JSON body, but user not found in DB",
-			"PATCH", "/v1/user/update/attrs", tokens.Access, bytes.NewBuffer([]byte(body["non-empty"])),
-			404, // sql: no rows in result set
+			"fail: send DELETE request to not found route",
+			"DELETE", "/v1/not-found",
+			404, // endpoint is not found
 		},
 	}
 
@@ -66,13 +47,12 @@ func TestPrivateRoutes(t *testing.T) {
 	app := fiber.New()
 
 	// Define routes.
-	PrivateRoutes(app)
+	NotFoundRoute(app)
 
 	// Iterate through test single test cases
 	for index, test := range tests {
 		// Create a new http request with the route from the test case.
-		req := httptest.NewRequest(test.httpMethod, test.route, test.body)
-		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", test.tokenString))
+		req := httptest.NewRequest(test.httpMethod, test.route, nil)
 		req.Header.Set("Content-Type", "application/json")
 
 		// Perform the request plain with the app.

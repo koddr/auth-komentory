@@ -28,61 +28,42 @@ func TestPublicRoutes(t *testing.T) {
 
 	// Define a structure for specifying input and output data of a single test case.
 	tests := []struct {
-		description   string
-		route         string // input route
-		httpMethod    string
-		body          io.Reader
-		expectedError bool
-		expectedCode  int
+		description  string
+		httpMethod   string
+		route        string // input route
+		body         io.Reader
+		expectedCode int
 	}{
 		// Failed test cases:
 		{
-			description:   "fail: apply activation code with no JSON body",
-			route:         "/v1/account/activate",
-			httpMethod:    "PATCH",
-			body:          nil,
-			expectedError: false,
-			expectedCode:  400,
+			"fail: apply activation code with no JSON body",
+			"PATCH", "/v1/account/activate", nil,
+			400, // unexpected end of JSON input
 		},
 		{
-			description:   "fail: apply activation code with empty code string in JSON body",
-			route:         "/v1/account/activate",
-			httpMethod:    "PATCH",
-			body:          bytes.NewBuffer([]byte(body["empty"])),
-			expectedError: false,
-			expectedCode:  404,
+			"fail: apply activation code with empty code string in JSON body",
+			"PATCH", "/v1/account/activate", bytes.NewBuffer([]byte(body["empty"])),
+			404, // sql: no rows in result set
 		},
 		{
-			description:   "fail: apply activation code with JSON body, but user not found in DB",
-			route:         "/v1/account/activate",
-			httpMethod:    "PATCH",
-			body:          bytes.NewBuffer([]byte(body["not-empty"])),
-			expectedError: false,
-			expectedCode:  404,
+			"fail: apply activation code with JSON body, but user not found in DB",
+			"PATCH", "/v1/account/activate", bytes.NewBuffer([]byte(body["not-empty"])),
+			404, // sql: no rows in result set
 		},
 		{
-			description:   "fail: apply reset code without JSON body",
-			route:         "/v1/password/reset",
-			httpMethod:    "PATCH",
-			body:          nil,
-			expectedError: false,
-			expectedCode:  400,
+			"fail: apply reset code without JSON body",
+			"PATCH", "/v1/password/reset", nil,
+			400, // unexpected end of JSON input
 		},
 		{
-			description:   "fail: apply reset code with empty code string in JSON body",
-			route:         "/v1/password/reset",
-			httpMethod:    "PATCH",
-			body:          bytes.NewBuffer([]byte(body["empty"])),
-			expectedError: false,
-			expectedCode:  404,
+			"fail: apply reset code with empty code string in JSON body",
+			"PATCH", "/v1/password/reset", bytes.NewBuffer([]byte(body["empty"])),
+			404, // sql: no rows in result set
 		},
 		{
-			description:   "fail: apply reset code with JSON body, but code not found in DB",
-			route:         "/v1/password/reset",
-			httpMethod:    "PATCH",
-			body:          bytes.NewBuffer([]byte(body["not-empty"])),
-			expectedError: false,
-			expectedCode:  404,
+			"fail: apply reset code with JSON body, but code not found in DB",
+			"PATCH", "/v1/password/reset", bytes.NewBuffer([]byte(body["not-empty"])),
+			404, // sql: no rows in result set
 		},
 	}
 
@@ -99,7 +80,7 @@ func TestPublicRoutes(t *testing.T) {
 		req.Header.Set("Content-Type", "application/json")
 
 		// Perform the request plain with the app.
-		resp, err := app.Test(req, -1) // the -1 disables request latency
+		resp, _ := app.Test(req, -1) // the -1 disables request latency
 
 		// Parse the response body.
 		body, errReadAll := ioutil.ReadAll(resp.Body)
@@ -122,15 +103,6 @@ func TestPublicRoutes(t *testing.T) {
 			"[%d] need to %s\nreal error output: %s",
 			readableIndex, test.description, result["msg"].(string),
 		)
-
-		// Verify, that no error occurred, that is not expected
-		assert.Equalf(t, test.expectedError, err != nil, test.description)
-
-		// As expected errors lead to broken responses,
-		// the next test case needs to be processed.
-		if test.expectedError {
-			continue
-		}
 
 		// Checking, if the JSON field "status" from the response body has the expected status code.
 		assert.Equalf(t, test.expectedCode, status, description)
