@@ -52,12 +52,6 @@ func CreateNewUser(c *fiber.Ctx) error {
 	// Create a new user struct.
 	user := &models.User{}
 
-	// Generate a new username with nanoID.
-	randomUsername, err := utilities.GenerateNewNanoID(utilities.LowerCaseChars, 18)
-	if err != nil {
-		return utilities.CheckForErrorWithStatusCode(c, err, 500, "nanoid", err.Error())
-	}
-
 	// Create a new variable for timestamp, because time fields in User model are pointers.
 	now := time.Now()
 
@@ -66,7 +60,6 @@ func CreateNewUser(c *fiber.Ctx) error {
 	user.CreatedAt = &now
 	user.Email = newUser.Email
 	user.PasswordHash = utilities.GeneratePassword(newUser.Password)
-	user.Username = randomUsername
 	user.UserStatus = 0 // 0 == unconfirmed, 1 == active, 2 == blocked
 	user.UserRole = utilities.RoleNameUser
 	user.UserAttrs.FirstName = newUser.UserAttrs.FirstName

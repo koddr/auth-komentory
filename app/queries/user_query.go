@@ -86,9 +86,8 @@ func (q *UserQueries) CreateNewUser(u *models.User) error {
 	INSERT INTO users
 	VALUES (
 		$1::uuid, $2::timestamp, $3::timestamp, 
-		$4::varchar, $5::varchar, $6::varchar, 
-		$7::int, $8::int, $9::jsonb, 
-		$10::jsonb
+		$4::varchar, $5::varchar, $6::int, 
+		$7::int, $8::jsonb, $9::jsonb
 	)
 	`
 
@@ -96,9 +95,8 @@ func (q *UserQueries) CreateNewUser(u *models.User) error {
 	_, err := q.Exec(
 		query,
 		u.ID, u.CreatedAt, u.UpdatedAt,
-		u.Email, u.PasswordHash, u.Username,
-		u.UserStatus, u.UserRole, u.UserAttrs,
-		u.UserSettings,
+		u.Email, u.PasswordHash, u.UserStatus,
+		u.UserRole, u.UserAttrs, u.UserSettings,
 	)
 	if err != nil {
 		// Return only error.

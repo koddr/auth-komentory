@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/Komentory/utilities v0.7.3
 	github.com/gofiber/fiber/v2 v2.20.1
-	github.com/gofiber/helmet/v2 v2.2.2
+	github.com/gofiber/helmet/v2 v2.2.3
 	github.com/gofiber/jwt/v2 v2.2.7
 	github.com/golang-jwt/jwt/v4 v4.1.0
 	github.com/google/uuid v1.3.0
