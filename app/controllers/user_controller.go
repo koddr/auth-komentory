@@ -195,20 +195,28 @@ func UserLogin(c *fiber.Ctx) error {
 		HTTPOnly: true,
 	})
 
-	// Clear no needed fields from JSON output.
-	foundedUser.CreatedAt = nil
-	foundedUser.UpdatedAt = nil
-	foundedUser.PasswordHash = ""
-	foundedUser.UserRole = 0
+	// Remap needed user fields from original User model output.
+	authenticatedUser := &models.AuthenticatedUser{
+		ID:         foundedUser.ID,
+		Email:      foundedUser.Email,
+		FirstName:  foundedUser.UserAttrs.FirstName,
+		LastName:   foundedUser.UserAttrs.LastName,
+		AboutMe:    foundedUser.UserAttrs.AboutMe,
+		Picture:    foundedUser.UserAttrs.Picture,
+		WebsiteURL: foundedUser.UserAttrs.WebsiteURL,
+		Abilities:  foundedUser.UserAttrs.Abilities,
+		Status:     foundedUser.UserStatus,
+		Settings:   foundedUser.UserSettings,
+	}
 
 	// Return status 200 OK.
 	return c.JSON(fiber.Map{
 		"status": fiber.StatusOK,
-		"user":   foundedUser,
 		"jwt": fiber.Map{
 			"expire": time.Now().Add(time.Minute * time.Duration(minutesCount)).Unix(),
 			"token":  tokens.Access,
 		},
+		"user": authenticatedUser,
 	})
 }
 

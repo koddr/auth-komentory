@@ -79,6 +79,20 @@ type UserLogin struct {
 	Password string `json:"password" validate:"required,lte=255"`
 }
 
+// User struct to describe authenticated user object.
+type AuthenticatedUser struct {
+	ID         uuid.UUID    `json:"id"`
+	Email      string       `json:"email"`
+	FirstName  string       `json:"first_name"`
+	LastName   string       `json:"last_name"`
+	AboutMe    string       `json:"about_me"`
+	Picture    string       `json:"picture"`
+	WebsiteURL string       `json:"website_url"`
+	Abilities  []string     `json:"abilities"`
+	Status     int          `json:"status"`
+	Settings   UserSettings `json:"settings"`
+}
+
 // ---
 // This methods simply returns the JSON-encoded representation of the struct.
 // ---
