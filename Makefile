@@ -9,7 +9,10 @@ clean:
 security:
 	gosec -quiet ./...
 
-test: security
+critic:
+	gocritic check ./...
+
+test: critic security
 	go test -cover ./...
 
 build: clean test
