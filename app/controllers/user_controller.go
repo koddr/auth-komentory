@@ -235,7 +235,7 @@ func UserLogout(c *fiber.Ctx) error {
 	// 	})
 	// }
 
-	// // Delete user token from Redis.
+	// Delete user token from Redis.
 	// errDelFromRedis := connRedis.Del(context.Background(), userID).Err()
 	// if errDelFromRedis != nil {
 	// 	// Return status 400 and bad request error.

@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http/httptest"
 	"testing"
 
@@ -79,7 +78,7 @@ func TestPrivateRoutes(t *testing.T) {
 		resp, _ := app.Test(req, -1) // the -1 disables request latency
 
 		// Parse the response body.
-		body, errReadAll := ioutil.ReadAll(resp.Body)
+		body, errReadAll := io.ReadAll(resp.Body)
 		if errReadAll != nil {
 			return
 		}

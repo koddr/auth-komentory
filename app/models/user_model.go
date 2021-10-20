@@ -98,12 +98,12 @@ type AuthenticatedUser struct {
 // ---
 
 // Value make the UserAttrs struct implement the driver.Valuer interface.
-func (u UserAttrs) Value() (driver.Value, error) {
+func (u *UserAttrs) Value() (driver.Value, error) {
 	return json.Marshal(u)
 }
 
 // Value make the UserSettings struct implement the driver.Valuer interface.
-func (u UserSettings) Value() (driver.Value, error) {
+func (u *UserSettings) Value() (driver.Value, error) {
 	return json.Marshal(u)
 }
 

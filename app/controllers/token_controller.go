@@ -63,7 +63,7 @@ func RenewTokens(c *fiber.Ctx) error {
 		// 	})
 		// }
 
-		//
+		// Checking refresh token.
 		// _, err = connRedis.Get(context.Background(), userID.String()).Result()
 		// if err == redis.Nil {
 		// 	// Return status 401 and unauthorized error message.
