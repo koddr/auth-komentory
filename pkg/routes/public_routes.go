@@ -18,8 +18,8 @@ func PublicRoutes(a *fiber.App) {
 	route.Post("/password/reset", controllers.CreateNewResetCode) // create a new reset code
 
 	// Routes for PATCH method:
-	route.Patch("/account/activate", controllers.ActivateAccount) // activate account by code
-	route.Patch("/password/reset", controllers.ApplyResetCode)    // apply code for reset password
+	route.Patch("/user/activate", controllers.ActivateUser)    // activate user account by code
+	route.Patch("/password/reset", controllers.ApplyResetCode) // apply code for reset password
 
 	// Routes for DELETE method:
 	route.Delete("/user/logout", controllers.UserLogout) // de-authorization user
