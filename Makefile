@@ -1,4 +1,4 @@
-.PHONY: clean test security build run
+.PHONY: clean lint security critic test build run
 
 APP_NAME = auth
 BUILD_DIR = $(PWD)/build
@@ -6,13 +6,16 @@ BUILD_DIR = $(PWD)/build
 clean:
 	rm -rf ./build
 
+lint:
+	golangci-lint run ./... --timeout 2m
+
 security:
-	gosec -quiet ./...
+	gosec -exclude=G307 ./...
 
 critic:
 	gocritic check -enableAll ./...
 
-test: critic security
+test: lint security critic
 	go test -cover ./...
 
 build: clean test
